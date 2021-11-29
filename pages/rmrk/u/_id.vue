@@ -12,7 +12,13 @@
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Identity ref="identity" :address="id" inline emit @change="handleIdentity" />
+              <Identity
+                ref="identity"
+                :address="id"
+                inline
+                emit
+                @change="handleIdentity"
+              />
             </a>
           </h1>
         </div>
@@ -24,8 +30,13 @@
             {{ $t('profile.user') }}
           </div>
           <div class="subtitle is-size-6">
-            <ProfileLink :address="id" :inline="true" :showTwitter="true"/>
-            <a :href="`https://sub.id/#/${id}`" target="_blank" rel="noopener noreferrer" class="is-inline-flex is-align-items-center pt-2">
+            <ProfileLink :address="id" :inline="true" :showTwitter="true" />
+            <a
+              :href="`https://sub.id/#/${id}`"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="is-inline-flex is-align-items-center pt-2"
+            >
               <figure class="image is-24x24 subid__less-margin">
                 <img alt="subid" src="/subid.svg" />
               </figure>
@@ -40,6 +51,10 @@
             label="Check this awesome Profile on %23KusamaNetwork %23KodaDot"
             :iframe="iframeSettings"
           >
+            <NuxtLink :to="visitMetaverse">
+              <b-button type="is-primary" icon-left="vr-cardboard" />
+            </NuxtLink>
+
             <DonationButton :address="id" />
           </Sharing>
         </div>
@@ -54,8 +69,10 @@
       >
         <b-tab-item value="nft">
           <template #header>
-            {{ $t("profile.created") }}
-            <span class="tab-counter" v-if="totalCreated">{{ totalCreated }}</span>
+            {{ $t('profile.created') }}
+            <span class="tab-counter" v-if="totalCreated">{{
+              totalCreated
+            }}</span>
           </template>
           <PaginatedCardList
             :id="id"
@@ -69,7 +86,12 @@
           :label="`Collections - ${totalCollections}`"
           value="collection"
         >
-          <Pagination hasMagicBtn replace :total="totalCollections" v-model="currentCollectionPage" />
+          <Pagination
+            hasMagicBtn
+            replace
+            :total="totalCollections"
+            v-model="currentCollectionPage"
+          />
           <GalleryCardList
             :items="collections"
             type="collectionDetail"
@@ -84,7 +106,7 @@
         </b-tab-item>
         <b-tab-item value="sold">
           <template #header>
-            {{ $t("profile.sold") }}
+            {{ $t('profile.sold') }}
             <span class="tab-counter" v-if="totalSold">{{ totalSold }}</span>
           </template>
           <PaginatedCardList
@@ -96,8 +118,10 @@
         </b-tab-item>
         <b-tab-item value="collected">
           <template #header>
-            {{ $t("profile.collected") }}
-            <span class="tab-counter" v-if="totalCollected">{{ totalCollected }}</span>
+            {{ $t('profile.collected') }}
+            <span class="tab-counter" v-if="totalCollected">{{
+              totalCollected
+            }}</span>
           </template>
           <PaginatedCardList
             :id="id"
@@ -155,75 +179,75 @@ const eq = (tab: string) => (el: string) => tab === el
         {
           property: 'og:title',
           vmid: 'og:title',
-          content: 'NFT Artist Profile on KodaDot'
+          content: 'NFT Artist Profile on KodaDot',
         },
         {
           property: 'og:description',
           vmid: 'og:description',
           content:
             (this.firstNFTData.description as string) ||
-            'Find more NFTs from this creator'
+            'Find more NFTs from this creator',
         },
         {
           property: 'og:image',
           vmid: 'og:image',
           content:
             (this.firstNFTData.image as string) ||
-            (this.defaultNFTImage as string)
+            (this.defaultNFTImage as string),
         },
         { property: 'twitter:site', content: '@KodaDot' },
         { property: 'twitter:card', content: 'summary_large_image' },
         {
           property: 'twitter:title',
           vmid: 'twitter:title',
-          content: 'NFT Artist Profile on KodaDot'
+          content: 'NFT Artist Profile on KodaDot',
         },
         {
           property: 'twitter:description',
           vmid: 'twitter:description',
           content:
             (this.firstNFTData.description as string) ||
-            'Find more NFTs from this creator'
+            'Find more NFTs from this creator',
         },
         {
           property: 'twitter:image',
           vmid: 'twitter:image',
           content:
             (this.firstNFTData.image as string) ||
-            (this.defaultNFTImage as string)
-        }
-      ]
+            (this.defaultNFTImage as string),
+        },
+      ],
     }
-  }
+  },
 })
 export default class Profile extends Vue {
-  public activeTab = 'nft';
-  public firstNFTData: any = {};
-  protected id = '';
-  protected shortendId = '';
-  protected isLoading = false;
-  protected collections: CollectionWithMeta[] = [];
-  protected packs: Pack[] = [];
-  protected name = '';
+  public activeTab = 'nft'
+  public firstNFTData: any = {}
+  protected id = ''
+  protected shortendId = ''
+  protected isLoading = false
+  protected collections: CollectionWithMeta[] = []
+  protected packs: Pack[] = []
+  protected name = ''
   // protected property: {[key: string]: any} = {};
-  protected email = '';
-  protected twitter = '';
-  protected web = '';
-  protected legal = '';
-  protected riot = '';
-  private currentValue = 1;
-  private first = 20;
-  private total = 0;
-  private currentCollectionPage = 1;
-  protected totalCollections = 0;
+  protected email = ''
+  protected twitter = ''
+  protected web = ''
+  protected legal = ''
+  protected riot = ''
+  private currentValue = 1
+  private first = 20
+  private total = 0
+  private currentCollectionPage = 1
+  protected totalCollections = 0
 
-  protected totalCreated = 0;
-  protected totalCollected = 0;
-  protected totalSold = 0;
+  protected totalCreated = 0
+  protected totalCollected = 0
+  protected totalSold = 0
 
-  readonly nftListByIssuer = nftListByIssuer;
-  readonly nftListCollected = nftListCollected;
-  readonly nftListSold = nftListSold;
+  readonly nftListByIssuer = nftListByIssuer
+  readonly nftListCollected = nftListCollected
+  readonly nftListSold = nftListSold
 
   public async mounted() {
     await this.fetchProfile()
@@ -247,7 +271,7 @@ export default class Profile extends Vue {
     return `${window.location.origin}${this.$route.path}/${this.activeTab}`
   }
 
-  get iframeSettings(): {width: string, height: string, customUrl: string} {
+  get iframeSettings(): { width: string; height: string; customUrl: string } {
     return { width: '100%', height: '100vh', customUrl: this.customUrl }
   }
 
@@ -261,9 +285,7 @@ export default class Profile extends Vue {
 
   get defaultNFTImage(): string {
     const url = new URL(window.location.href)
-    return (
-      `${url.protocol}//${url.hostname}/koda300x300.svg`
-    )
+    return `${url.protocol}//${url.hostname}/koda300x300.svg`
   }
 
   protected async fetchProfile() {
@@ -281,10 +303,10 @@ export default class Profile extends Vue {
           return {
             account: this.id,
             first: this.first,
-            offset: this.collectionOffset
+            offset: this.collectionOffset,
           }
         },
-        fetchPolicy: 'cache-and-network'
+        fetchPolicy: 'cache-and-network',
       })
 
       this.$apollo.addSmartQuery('firstNft', {
@@ -294,10 +316,10 @@ export default class Profile extends Vue {
         result: this.handleResult,
         variables: () => {
           return {
-            account: this.id
+            account: this.id,
           }
         },
-        fetchPolicy: 'cache-and-network'
+        fetchPolicy: 'cache-and-network',
       })
 
       // this.packs = await rmrkService
@@ -309,7 +331,10 @@ export default class Profile extends Vue {
       console.warn(e)
     }
     // this.isLoading = false;
+  }
 
+  get visitMetaverse(): string {
+    return `meta/${this.id}`
   }
 
   protected async handleResult({ data }: any) {
@@ -319,7 +344,7 @@ export default class Profile extends Vue {
         const meta = await fetchNFTMetadata(nfts[0])
         this.firstNFTData = {
           ...meta,
-          image: sanitizeIpfsUrl(meta.image || '')
+          image: sanitizeIpfsUrl(meta.image || ''),
         }
       }
     }
@@ -369,14 +394,14 @@ export default class Profile extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import "@/styles/variables";
+@import '@/styles/variables';
 
 .invisible-tab > nav.tabs {
   display: none;
 }
 
 .tab-counter::before {
-  content: " - ";
+  content: ' - ';
   white-space: pre;
 }
 
@@ -386,6 +411,6 @@ export default class Profile extends Vue {
 }
 
 .subid__less-margin {
-  margin: auto .5em auto 0;
+  margin: auto 0.5em auto 0;
 }
 </style>
