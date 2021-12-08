@@ -1,16 +1,17 @@
 <template>
   <div class="language-switcher">
     <b-dropdown aria-role="list">
-      <template #trigger>
+      <template #trigger="{ active }">
         <b-button
-          label="Language"
           type="is-primary"
+          :label="userFlag"
+          :icon-right="active ? 'caret-up' : 'caret-down'"
         />
       </template>
       <b-dropdown-item
-        v-for="(lang, i) in langsFlags"
-        :key="`Lang${i}`"
         aria-role="listitem"
+        v-for="lang in langsFlags"
+        :key="lang.value"
         :value="userLang"
         :class="{ 'is-active': userLang === lang.value}"
         @click="setUserLang(lang.value)"
@@ -28,17 +29,21 @@ import { Component, Vue } from 'nuxt-property-decorator'
 @Component({})
 export default class LocaleChanger extends Vue {
 
-  get langsFlags() {
-    return this.$store.state.language.langsFlags
+  get langsFlags(): string {
+    return this.$store.getters['lang/getLangsFlags']
   }
 
-  get userLang() {
-    this.$i18n.locale = this.$store.getters.getUserLang
-    return this.$store.getters.getUserLang
+  get userFlag(): string {
+    return this.$store.getters['lang/getUserFlag']
+  }
+
+  get userLang(): string {
+    this.$i18n.locale = this.$store.getters['lang/getUserLang']
+    return this.$store.getters['lang/getUserLang']
   }
 
   setUserLang(value: string) {
-    this.$store.commit('setLanguage', { 'userLang': value})
+    this.$store.dispatch('lang/setLanguage', { 'userLang': value})
     this.$i18n.locale = value
   }
 }

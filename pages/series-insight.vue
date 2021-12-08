@@ -1,16 +1,10 @@
 <template>
-  <div class="container mb-1">
-    <section>
-      <h1 class="title is-2">
-        {{ $t('series.title') }}
-      </h1>
-      <p class="subtitle is-size-5">
-        {{ $t('series.subtitle') }}
-      </p>
+  <section>
+    <h1 class="title is-2">{{ $t('series.title') }}</h1>
+    <p class="subtitle is-size-5">{{ $t('series.subtitle') }}</p>
 
-      <SeriesTable />
-    </section>
-  </div>
+    <SeriesTable />
+  </section>
 </template>
 <script lang="ts" >
 import { Component, Vue } from 'nuxt-property-decorator'
@@ -34,7 +28,7 @@ import { Component, Vue } from 'nuxt-property-decorator'
         },
         {
           property: 'og:image',
-          content: 'https://nft.kodadot.xyz/kodadot_community.jpeg'
+          content: this.defaultSeriesMetaImage
         },
         {
           property: 'twitter:title',
@@ -46,7 +40,7 @@ import { Component, Vue } from 'nuxt-property-decorator'
         },
         {
           property: 'twitter:image',
-          content: 'https://nft.kodadot.xyz/kodadot_community.jpeg'
+          content: this.defaultSeriesMetaImage
         }
       ]
     }
@@ -56,5 +50,12 @@ import { Component, Vue } from 'nuxt-property-decorator'
     SeriesTable: () => import('@/components/series/SeriesTable.vue')
   }
 })
-export default class Series extends Vue {}
+export default class Series extends Vue {
+  get defaultSeriesMetaImage(): string {
+    const url = new URL(window.location.href)
+    return (
+      `${url.protocol}//${url.hostname}/kodadot_rank.jpg`
+    )
+  }
+}
 </script>

@@ -10,8 +10,8 @@
       <div class="columns is-multiline">
         <div class="column is-4" v-for="collection in results" :key="collection.id">
           <div class="card collection-card">
-            <router-link
-              :to="{ name: 'collectionDetail', params: { id: collection.id } }"
+            <nuxt-link
+              :to="`collection/${collection.id}`"
               tag="div"
               class="collection-card__skeleton"
             >
@@ -20,17 +20,14 @@
               </div>
 
               <div class="card-content">
-                <router-link
-                  :to="{
-                    name: 'collectionDetail',
-                    params: { id: collection.id }
-                  }"
+                <nuxt-link
+                  :to="`collection/${collection.id}`"
                 >
                   <CollectionDetail :nfts="collection.nfts.nodes" :name="collection.name" />
-                </router-link>
+                </nuxt-link>
                 <b-skeleton :active="isLoading"> </b-skeleton>
               </div>
-            </router-link>
+            </nuxt-link>
           </div>
         </div>
       </div>

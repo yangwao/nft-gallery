@@ -1,9 +1,9 @@
 @import "initial-variables";
 
-$primary: #db2980;
+$primary: #ff149366;
 
 // $info: $cyan;
-// $success: $green;
+$success: $green;
 // $warning: $yellow;
 // $danger: $red;
 
@@ -59,7 +59,7 @@ $scheme-invert-ter: $white-ter;
 
 // // Text colors
 
-$text: $white;
+$text: #dcdcdc;
 // $text-invert: findColorInvert($text);
 // $text-light: $grey;
 // $text-strong: $grey-darker;
@@ -112,3 +112,5 @@ $family-primary: $family-monospace;
 
 
 $text-strong: $scheme-invert;
+
+$light-text: #c0c0c0;
