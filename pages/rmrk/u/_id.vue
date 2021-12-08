@@ -40,6 +40,9 @@
             label="Check this awesome Profile on %23KusamaNetwork %23KodaDot"
             :iframe="iframeSettings"
           >
+            <NuxtLink :to="visitMetaverse">
+              <b-button type="is-primary" icon-left="vr-cardboard" />
+            </NuxtLink>
             <DonationButton :address="id" />
           </Sharing>
         </div>
@@ -264,6 +267,10 @@ export default class Profile extends Vue {
     return (
       `${url.protocol}//${url.hostname}/koda300x300.svg`
     )
+  }
+
+  get visitMetaverse(): string {
+    return `meta/${this.id}`
   }
 
   protected async fetchProfile() {
