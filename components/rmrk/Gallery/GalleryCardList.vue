@@ -12,7 +12,7 @@
         <GalleryCard
           :id="nft.id"
           :name="nft.name"
-          :type="type"
+          :route="route"
           :link="link"
           :metadata="nft.metadata"
           :price="nft.price"
@@ -35,17 +35,18 @@ const components = {
 
 @Component({ components })
 export default class GalleryCardList extends Vue {
-  @Prop({ default: 'nftDetail' }) public type!: string;
-  @Prop({ default: 'rmrk/detail' }) public link!: string;
+  @Prop({ default: '/rmrk/gallery' }) public route!: string;
+  @Prop({ default: 'rmrk/gallery' }) public link!: string;
   @Prop() public items!: RmrkType[];
-  @Prop({ default: false }) public horizontalLayout!: boolean;
+  @Prop(Boolean) public horizontalLayout!: boolean;
   get classLayout() {
-    return this.$store.getters.getLayoutClass
+    return this.$store.getters['preferences/getLayoutClass']
   }
 }
 
 </script>
 <style>
+/* TODO: move to global */
 .b-radio.radio.button.is-selected{
   background-color: #db2980;
 }

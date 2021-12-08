@@ -1,6 +1,6 @@
 <template>
-  <section class="hero is-dark homepage">
-    <div class="hero-body">
+  <section class="homepage">
+    <section class="section">
       <div class="container">
         <div class="columns">
           <div class="column">
@@ -36,55 +36,55 @@
                 <b-dropdown-item
                   aria-role="listitem"
                 >
-                  <router-link :to="{ name: 'rmrk'}">
+                  <nuxt-link :to="{ name: 'rmrk'}">
                     {{ $t('Classic') }}
-                  </router-link>
+                  </nuxt-link>
                 </b-dropdown-item>
                 <b-dropdown-item
                   aria-role="listitem"
                 >
-                  <router-link :to="{ name: 'simpleMint'}">
+                  <nuxt-link :to="{ name: 'simpleMint'}">
                     {{ $t('Simple') }}
-                  </router-link>
+                  </nuxt-link>
                 </b-dropdown-item>
               </b-dropdown>
               <b-button
-                tag="router-link"
+                tag="nuxt-link"
                 to="/rmrk/collections"
                 type="is-primary"
               >
                 Collections
               </b-button>
               <b-button
-                tag="router-link"
+                tag="nuxt-link"
                 to="/rmrk/gallery"
                 type="is-primary"
               >
                 Gallery
               </b-button>
               <b-button
-                tag="router-link"
+                tag="nuxt-link"
                 to="/spotlight"
                 type="is-primary"
               >
                 Spotlight
               </b-button>
               <b-button
-                tag="router-link"
+                tag="nuxt-link"
                 to="/series-insight"
                 type="is-primary"
               >
                 Series
               </b-button>
               <b-button
-                  tag="router-link"
+                  tag="nuxt-link"
                   to="/about"
                   type="is-primary"
               >
                 About
               </b-button>
               <b-button
-                  tag="router-link"
+                  tag="nuxt-link"
                   to="/rmrk/faq"
                   type="is-primary"
               >
@@ -99,6 +99,15 @@
               >
                 Grants
               </b-button>
+              <b-button
+                tag="a"
+                href="https://en.wikipedia.org/wiki/Non-fungible_token"
+                target="_blank"
+                rel="noopener noreferrer"
+                type="is-primary"
+              >
+                What are NFTs?
+              </b-button>
             </div>
           </div>
           <div class="column has-text-right has-text-left-mobile">
@@ -112,7 +121,7 @@
               Would you like to get featured on our gallery page? Perhaps you have a business proposal in mind. Maybe you would like to be an ambassador. Go to this section for all of the above.
             </p>
             <b-button
-              tag="router-link"
+              tag="nuxt-link"
               to="/partnership"
               type="is-primary"
               class="homepage__button--wrapped"
@@ -157,19 +166,14 @@
           </b-button>
         </div>
       </div>
-    </div>
+    </section>
   </section>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import nftListWithSearch from '@/queries/nftListWithSearch.graphql'
-import { denyList } from '@/constants'
-import { getMany, update } from 'idb-keyval'
-import { fetchNFTMetadata } from '@/components/rmrk/utils'
 
 const components = {
-  Identity: () => import('@/components/shared/format/Identity.vue'),
 }
 @Component<Landing>({
   metaInfo() {
@@ -204,43 +208,8 @@ export default class Landing extends Vue {
     ['Want to help translate?', 'https://github.com/kodadot/nft-gallery/tree/i18n/src/locales']
   ]
 
-  public mounted() {
-    this.fetchFirstGalleryPage()
-  }
-
-  public async fetchFirstGalleryPage() {
-    const nfts = this.$apollo.query({
-      query: nftListWithSearch,
-      variables: {
-        first: 12,
-        offset: 0,
-        denyList,
-        search: []
-      }
-    })
-
-    const {
-      data: { nFTEntities: { nodes: nftList } }
-    } = await nfts
-
-    const storedPromise = getMany(
-      nftList.map(({ metadata }: any) => metadata)
-    )
-
-    const storedMetadata = await storedPromise
-
-    storedMetadata.forEach(async (m, i) => {
-      if (!m) {
-        try {
-          const meta = await fetchNFTMetadata(nftList[i])
-          update(nftList[i].metadata, () => meta)
-        } catch (e) {
-          console.warn('[ERR] unable to get metadata')
-        }
-      }
-    })
-
-
+  layout() {
+    return 'full-width-layout'
   }
 }
 </script>

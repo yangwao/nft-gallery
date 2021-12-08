@@ -1,4 +1,7 @@
 export default {
+  server: {
+    port: 9090 // default: 3000
+  },
   // Disable server-side rendering: https://go.nuxtjs.dev/ssr-mode
   ssr: false,
 
@@ -34,6 +37,7 @@ export default {
     '~/plugins/filters',
     '~/plugins/globalVariables',
     '~/plugins/metaInfo',
+    '~/plugins/pwa',
     '~/plugins/vueAudioVisual',
     '~/plugins/vueClipboard',
     '~/plugins/vueSocialSharing',
@@ -83,6 +87,10 @@ export default {
         path: '~/components/transfer',
         extensions: ['vue']
       },
+      {
+        path: '~/components/metaverse',
+        extensions: ['vue', 'js']
+      },
     ]
   },
 
@@ -91,6 +99,7 @@ export default {
   buildModules: [
     // https://go.nuxtjs.dev/typescript
     '@nuxt/typescript-build',
+    '@nuxtjs/pwa'
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules
