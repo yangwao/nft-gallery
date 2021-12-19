@@ -9,7 +9,7 @@
 
     <!-- 3d Models -->
     <a-gltf-model :src="space" scale="1 1 1" position="15.70262 -0.9575 -2.54031"
-        gltf-model="https://cdn.glitch.me/6d877418-2a34-48a1-b3eb-2cc2670deeef%2FGlb1.glb?v=1636762271679" visible=""
+        gltf-model="https://cdn.glitch.me/c9c2f307-5be9-4440-ad35-821ca6e19c95%2FKodaGallery%20Glb.glb?v=1639415356213" visible=""
         rotation="0 -92.0743176775233 0">
 
         <a-entity v-if="id" :arrange-nft="formatedId">
