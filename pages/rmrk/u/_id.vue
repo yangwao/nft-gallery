@@ -17,27 +17,6 @@
       </div>
     </div>
 
-<<<<<<< HEAD
-      <div class="columns is-mobile">
-        <div class="column">
-          <div class="label">
-            {{ $t('profile.user') }}
-          </div>
-          <div class="subtitle is-size-6">
-            <ProfileLink :address="id" :inline="true" :showTwitter="true" />
-            <a
-              :href="`https://sub.id/#/${id}`"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="is-inline-flex is-align-items-center pt-2"
-            >
-              <figure class="image is-24x24 subid__less-margin">
-                <img alt="subid" src="/subid.svg" />
-              </figure>
-              {{ shortendId }}
-            </a>
-          </div>
-=======
     <div class="columns is-mobile">
       <div class="column">
         <div class="label">
@@ -51,7 +30,6 @@
             </figure>
             {{ shortendId }}
           </a>
->>>>>>> 73a0dd760cb5c1e411968e208a1f7b86e1e36e4e
         </div>
       </div>
         <div class="column has-text-right">
@@ -64,10 +42,6 @@
             <NuxtLink :to="visitMetaverse">
               <b-button type="is-primary" icon-left="vr-cardboard" />
             </NuxtLink>
-<<<<<<< HEAD
-
-=======
->>>>>>> 73a0dd760cb5c1e411968e208a1f7b86e1e36e4e
             <DonationButton :address="id" />
           </Sharing>
       </div>
@@ -96,79 +70,6 @@
         :label="`Collections - ${totalCollections}`"
         value="collection"
       >
-<<<<<<< HEAD
-        <b-tab-item value="nft">
-          <template #header>
-            {{ $t('profile.created') }}
-            <span class="tab-counter" v-if="totalCreated">{{
-              totalCreated
-            }}</span>
-          </template>
-          <PaginatedCardList
-            :id="id"
-            :query="nftListByIssuer"
-            @change="totalCreated = $event"
-            :account="id"
-            :showSearchBar="true"
-          />
-        </b-tab-item>
-        <b-tab-item
-          :label="`Collections - ${totalCollections}`"
-          value="collection"
-        >
-          <Pagination
-            hasMagicBtn
-            replace
-            :total="totalCollections"
-            v-model="currentCollectionPage"
-          />
-          <GalleryCardList
-            :items="collections"
-            type="collectionDetail"
-            link="rmrk/collections"
-          />
-          <Pagination
-            replace
-            class="pt-5 pb-5"
-            :total="totalCollections"
-            v-model="currentCollectionPage"
-          />
-        </b-tab-item>
-        <b-tab-item value="sold">
-          <template #header>
-            {{ $t('profile.sold') }}
-            <span class="tab-counter" v-if="totalSold">{{ totalSold }}</span>
-          </template>
-          <PaginatedCardList
-            :id="id"
-            :query="nftListSold"
-            @change="totalSold = $event"
-            :account="id"
-          />
-        </b-tab-item>
-        <b-tab-item value="collected">
-          <template #header>
-            {{ $t('profile.collected') }}
-            <span class="tab-counter" v-if="totalCollected">{{
-              totalCollected
-            }}</span>
-          </template>
-          <PaginatedCardList
-            :id="id"
-            :query="nftListCollected"
-            @change="totalCollected = $event"
-            :account="id"
-          />
-        </b-tab-item>
-
-        <!-- <b-tab-item label="Packs" value="pack">
-          <span>TODO: Reintroduce</span>
-          <GalleryCardList :items="packs" type="packDetail" link="rmrk/pack" />
-        </b-tab-item> -->
-      </b-tabs>
-    </div>
-  </div>
-=======
         <Pagination hasMagicBtn replace :total="totalCollections" v-model="currentCollectionPage" />
         <GalleryCardList
           :items="collections"
@@ -213,7 +114,6 @@
       </b-tab-item> -->
     </b-tabs>
   </section>
->>>>>>> 73a0dd760cb5c1e411968e208a1f7b86e1e36e4e
 </template>
 
 <script lang="ts">
@@ -412,9 +312,7 @@ export default class Profile extends Vue {
     // this.isLoading = false;
   }
 
-  get visitMetaverse(): string {
-    return `meta/${this.id}`
-  }
+
 
   protected async handleResult({ data }: any) {
     if (!this.firstNFTData.image && data) {
