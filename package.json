@@ -65,6 +65,7 @@
         "nuxt-property-decorator": "^2.9.1",
         "setimmediate": "^1.0.5",
         "slugify": "^1.5.3",
+        "three": "^0.135.0",
         "v-emoji-picker": "^2.3.3",
         "vue": "^2.6.14",
         "vue-apollo": "^3.0.7",
@@ -88,7 +89,6 @@
         "@intlify/vue-i18n-loader": "^1.0.0",
         "@nuxt/types": "^2.15.8",
         "@nuxt/typescript-build": "^2.1.0",
-
         "@nuxtjs/pwa": "^3.3.5",
         "@types/aframe": "^1.0.5",
         "@types/luxon": "^2.0.7",
