@@ -4,9 +4,10 @@ import * as THREE from 'three'
 import { getMetaData, getNFTListBYIssuer, getParameterByName, fetchNFTMetadata } from './random'
 
 AFRAME.registerComponent("arrange-nft", {
-    SECTION1_FRONT_WALL_LIMIT: 7,
-    SECTION1_LEFT_WALL_LIMIT: 11,
-    DISTANCE_BETWEEN_FRAME: 16,
+    SECTION1_FRONT_WALL_LIMIT: 5,
+    SECTION1_LEFT_WALL_LIMIT: 12,
+    DISTANCE_BETWEEN_FRAME: 20,
+    EXTRA_SPACE: 120,
     startDataOffset: 0,
     endDataOffset: 0,
     frameWidth: 0,
@@ -70,7 +71,7 @@ AFRAME.registerComponent("arrange-nft", {
         this.setSection1BackWall(backSect1WallNFTS);
 
         //TODO: Load new nfts on blocks
-        this.setBlocks(issuerNFTS);
+        //this.setBlocks(issuerNFTS);
 
         // console.log(issuerNFTS);
         // console.log(frontSec1tWallNFTS);
@@ -189,7 +190,7 @@ AFRAME.registerComponent("arrange-nft", {
             // console.log(nfts[i]);
             let metaData = await getMetaData(nfts[i].metadata);
             let boxEl = this.createArtFrame({
-                position: { x: -264.82978, y: 39.87341, z: boxZPos },
+                position: { x: -420, y: 39.87341, z: boxZPos },
                 rotation: { y: -90 },
                 src: metaData.imageUrl,
             });
@@ -200,6 +201,7 @@ AFRAME.registerComponent("arrange-nft", {
 
     setSection1LeftWall: async function(nfts) {
         let boxXPos = -229.107;
+        let frameDistance = 0;
         for (let i = 0; i < nfts.length; i++) {
             let metaData = await getMetaData(nfts[i].metadata);
             let boxEl = this.createArtFrame({
@@ -207,7 +209,12 @@ AFRAME.registerComponent("arrange-nft", {
                 src: metaData.imageUrl,
             });
             this.el.appendChild(boxEl);
-            boxXPos += this.frameWidth + this.DISTANCE_BETWEEN_FRAME;
+
+            frameDistance = this.DISTANCE_BETWEEN_FRAME;
+            if (i == 4) {
+                frameDistance = this.EXTRA_SPACE;
+            }
+            boxXPos += this.frameWidth + frameDistance;
         }
     },
 
@@ -227,6 +234,7 @@ AFRAME.registerComponent("arrange-nft", {
 
     setSection1RightWall: async function(nfts) {
         let boxXPos = -235;
+        let frameDistance = 0;
         for (let i = 0; i < nfts.length; i++) {
             let metaData = await getMetaData(nfts[i].metadata);
             let boxEl = this.createArtFrame({
@@ -235,7 +243,12 @@ AFRAME.registerComponent("arrange-nft", {
                 src: metaData.imageUrl,
             });
             this.el.appendChild(boxEl);
-            boxXPos += this.frameWidth + this.DISTANCE_BETWEEN_FRAME;
+
+            frameDistance = this.DISTANCE_BETWEEN_FRAME;
+            if (i == 4) {
+                frameDistance = this.EXTRA_SPACE;
+            }
+            boxXPos += this.frameWidth + frameDistance;
         }
     },
 
@@ -244,7 +257,7 @@ AFRAME.registerComponent("arrange-nft", {
         for (let i = 0; i < nfts.length; i++) {
             let metaData = await getMetaData(nfts[i].metadata);
             let boxEl = this.createArtFrame({
-                position: { x: 268, y: 39.87, z: boxZPos },
+                position: { x: 420, y: 50.87, z: boxZPos },
                 rotation: { y: 90 },
                 src: metaData.imageUrl,
             });

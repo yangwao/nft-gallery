@@ -1,5 +1,5 @@
 <template>
-  <a-scene inspector-plugin-recast>
+  <a-scene inspector-plugin-recast gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/versioned/decoders/1.5.0/;">
     <a-assets id="assets">
         <a-mixin id="all-interactions" hoverable grabbable draggable
             event-set__hoveron="_event: hover-start; material.opacity: 0.7; transparent: true"
@@ -8,15 +8,25 @@
     </a-assets>
 
     <!-- 3d Models -->
-    <!-- <a-gltf-model :src="space" scale="10 10 10" position="0 0 0"
-        gltf-model="https://cdn.glitch.me/af8eb8bf-2d48-4e54-a9b4-65d5c6a2e8dd/Ice_KodaGallery%20New%204k.glb?v=1640005593732" visible=""
+    <!-- <a-gltf-model position="15.70262 -0.9575 -2.54031"
+        gltf-model="https://cdn.glitch.me/c9c2f307-5be9-4440-ad35-821ca6e19c95%2FKodaGallery%20Glb.glb?v=1639415356213" visible=""
         rotation="0 -92.0743176775233 0">
+
+        <a-entity v-if="id" :arrange-nft="formatedId">
+        </a-entity>
     </a-gltf-model> -->
 
-    <!-- NFT IMAGES -->
-    <a-entity v-if="id" :arrange-nft="formatedId">
+    <a-entity position="15.70262 -0.9575 -2.54031" visible=""
+        rotation="0 -92.0743176775233 0">
+
+        <a-gltf-model scale="90 90 220"
+        gltf-model="https://cdn.glitch.me/af8eb8bf-2d48-4e54-a9b4-65d5c6a2e8dd/Ice_KodaGallery%20New%204k.glb?v=1640005593732" visible=""
+        rotation="0 -92.0743176775233 0">
+        </a-gltf-model>
+        <a-entity v-if="id" :arrange-nft="formatedId">
         </a-entity>
-        
+    </a-entity>
+
     <!-- Camera Rig -->
     <a-entity id="cameraRig">
         <!-- position="0 8 0" -->
@@ -36,7 +46,6 @@
                 align="center" color="#FFFFFF"></a-text>
             <a-sphere radius="0.01" position="0 0 -1.2" color="#FFFFFF" physx-no-collision></a-sphere>
         </a-entity>
-        
     </a-entity>
 </a-scene>
 </template>
@@ -47,7 +56,8 @@ import { NFT } from '../rmrk/service/scheme';
 
 @Component({})
 export default class Base extends Vue {
-  public space = 'https://cdn.glitch.me/af8eb8bf-2d48-4e54-a9b4-65d5c6a2e8dd/Ice_KodaGallery%20New%204k.glb?v=1640005593732'
+  public space = 'https://cdn.glitch.me/6d877418-2a34-48a1-b3eb-2cc2670deeef%2FGlb1.glb?v=1636762271679'
+//   https://cdn.glitch.me/c9c2f307-5be9-4440-ad35-821ca6e19c95%2FKodaGallery%20Glb.glb?v=1639415356213
   private value2: any;
   @Prop({ type: Array, required: true }) public nfts!: NFT[];
   @Prop(String) public id!: string;
