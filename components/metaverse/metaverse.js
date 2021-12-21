@@ -1,11 +1,11 @@
 import AFRAME from 'aframe';
-import * as THREE from 'three'
+import * as THREE from 'three';
 
-import { getMetaData, getNFTListBYIssuer, getParameterByName, fetchNFTMetadata } from './random'
+import { getMetaData, getNFTListBYIssuer, getParameterByName, fetchNFTMetadata } from './random';
 
 AFRAME.registerComponent("arrange-nft", {
-    SECTION1_FRONT_WALL_LIMIT: 5,
-    SECTION1_LEFT_WALL_LIMIT: 12,
+    SECTION1_FRONT_WALL_LIMIT: 3,
+    SECTION1_LEFT_WALL_LIMIT: 4,
     DISTANCE_BETWEEN_FRAME: 20,
     EXTRA_SPACE: 120,
     startDataOffset: 0,
