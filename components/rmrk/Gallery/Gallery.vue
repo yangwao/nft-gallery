@@ -4,7 +4,14 @@
     <!-- TODO: Make it work with graphql -->
     <Search v-bind.sync="searchQuery">
       <b-field class="column">
-        <Pagination hasMagicBtn simple :total="total" v-model="currentValue" :perPage=12 replace class="is-right" />
+        <Pagination
+          hasMagicBtn
+          simple
+          :total="total"
+          v-model="currentValue"
+          :perPage="first"
+          replace
+          class="is-right remove-margin" />
       </b-field>
     </Search>
     <!-- <b-button @click="first += 1">Show {{ first }}</b-button> -->
@@ -14,10 +21,8 @@
         <div class="column is-4" v-for="nft in results" :key="nft.id">
           <div class="card nft-card">
             <nuxt-link
-              :to="`/rmrk/gallery/${nft.id}`"
-              tag="div"
-              class="nft-card__skeleton"
-            >
+              :to="`/${urlPrefix}/gallery/${nft.id}`"
+              class="nft-card__skeleton">
               <div class="card-image">
                 <span v-if="nft.emoteCount" class="card-image__emotes">
                   <b-icon icon="heart" />
@@ -25,8 +30,13 @@
                     nft.emoteCount
                   }}</span>
                 </span>
-                <BasicImage :src="nft.image" :alt="nft.name" customClass="gallery__image-wrapper" />
-                <span v-if="nft.price > 0" class="card-image__price">
+                <BasicImage
+                  :src="nft.image"
+                  :alt="nft.name"
+                  customClass="gallery__image-wrapper" />
+                <span
+                  v-if="nft.price > 0 && showPriceValue"
+                  class="card-image__price">
                   <Money :value="nft.price" inline />
                 </span>
               </div>
@@ -36,36 +46,20 @@
                   v-if="!isLoading"
                   class="title mb-0 is-4 has-text-centered"
                   id="hover-title"
-                  :title="nft.name"
-                >
-                  <nuxt-link
-                    v-if="nft.count < 2"
-                    :to="`/rmrk/gallery/${nft.id}`"
-                  >
-                    <div>
-                      <div class="has-text-overflow-ellipsis middle">
-                        {{ nft.name }}
-                      </div>
-                    </div>
-                  </nuxt-link>
-                  <nuxt-link
-                    v-else
-                    :to="`/rmrk/collection/${nft.collectionId}`"
-                  >
+                  :title="nft.name">
+                  <nuxt-link :to="`/${urlPrefix}/gallery/${nft.id}`">
                     <div class="has-text-overflow-ellipsis">
                       {{ nft.name }}
                     </div>
                   </nuxt-link>
-
                   <p
                     v-if="nft.count > 2"
                     :title="`${nft.count} items available in collection`"
-                    class="is-absolute nft-collection-counter title is-6"
-                  >
+                    class="is-absolute nft-collection-counter title is-6">
                     「{{ nft.count }}」
                   </p>
                 </span>
-                <b-skeleton :active="isLoading"> </b-skeleton>
+                <!-- <b-skeleton :active="isLoading"> </b-skeleton> -->
               </div>
             </nuxt-link>
           </div>
@@ -75,33 +69,34 @@
     <Pagination
       class="pt-5 pb-5"
       :total="total"
-      :perPage=12
+      :perPage="first"
       v-model="currentValue"
-      replace
-    />
+      replace />
   </div>
 </template>
 
-<script lang="ts" >
-import { Component, Vue } from 'nuxt-property-decorator'
+<script lang="ts">
+import { Component, Vue, mixins } from 'nuxt-property-decorator'
 
-import { NFTWithMeta, NFT, Metadata } from '../service/scheme'
-import { fetchNFTMetadata, getSanitizer } from '../utils'
+import { NFTWithMeta, NFT, Metadata, NFTMetadata } from '../service/scheme'
+import { fetchMetadata, fetchNFTMetadata, getSanitizer } from '../utils'
 import Freezeframe from 'freezeframe'
 import 'lazysizes'
 import { SearchQuery } from './Search/types'
 
-import nftListWithSearch from '@/queries/nftListWithSearch.graphql'
 import { getMany, update } from 'idb-keyval'
-import { denyList } from '@/constants'
+import { denyList, statemineDenyList } from '@/utils/constants'
+import { DocumentNode } from 'graphql'
+import { NFTWithCollectionMeta } from 'components/unique/graphqlResponseTypes'
+import PrefixMixin from '~/utils/mixins/prefixMixin'
 
 interface Image extends HTMLImageElement {
-  ffInitialized: boolean;
+  ffInitialized: boolean
 }
 
 const controlFilters = [{ name: { notLikeInsensitive: '%Penis%' } }]
 
-type NFTType = NFTWithMeta;
+type SearchedNftsWithMeta = NFTWithCollectionMeta & NFTMetadata
 const components = {
   GalleryCardList: () => import('./GalleryCardList.vue'),
   Search: () => import('./Search/SearchBar.vue'),
@@ -112,76 +107,64 @@ const components = {
 }
 
 @Component<Gallery>({
-  metaInfo() {
-    return {
-      meta: [
-        {
-          property: 'og:title',
-          content: 'Low minting fees and carbonless NFTs'
-        },
-        {
-          property: 'og:image',
-          content: 'https://nft.kodadot.xyz/kodadot_gallery.jpg'
-        },
-        {
-          property: 'og:description',
-          content: 'Buy Carbonless NFTs on Kusama'
-        },
-        {
-          property: 'twitter:title',
-          content: 'Low minting fees and carbonless NFTs'
-        },
-        {
-          property: 'twitter:description',
-          content: 'Buy Carbonless NFTs on Kusama'
-        },
-        {
-          property: 'twitter:image',
-          content: 'https://nft.kodadot.xyz/kodadot_gallery.jpg'
-        }
-      ]
-    }
-  },
-  components
+  components,
+  name: 'Gallery',
 })
-export default class Gallery extends Vue {
-  private nfts: NFT[] = [];
-  private meta: Metadata[] = [];
+export default class Gallery extends mixins(PrefixMixin) {
+  private nfts: NFTWithCollectionMeta[] = []
+  private meta: Metadata[] = []
   private searchQuery: SearchQuery = {
     search: '',
     type: '',
     sortBy: 'BLOCK_NUMBER_DESC',
     listed: false,
-  };
-  private first = 12;
-  private placeholder = '/koda300x300.svg';
-  private currentValue = 1;
-  private total = 0;
+  }
+  private placeholder = '/Kodadot_logo.svg'
+  private currentValue = 1
+  private total = 0
+  private loadingState = 0
+
+  get first(): number {
+    return this.$store.getters['preferences/getGalleryItemsPerPage']
+  }
 
   get isLoading() {
-    return this.$apollo.queries.nfts.loading
+    return Boolean(this.loadingState)
   }
 
   get offset() {
     return this.currentValue * this.first - this.first
   }
 
+  get showPriceValue(): boolean {
+    return (
+      this.searchQuery?.listed ||
+      this.$store.getters['preferences/getShowPriceValue']
+    )
+  }
+
   public async created() {
+    const isRemark = this.urlPrefix === 'rmrk'
+    const query = isRemark
+      ? await import('@/queries/nftListWithSearch.graphql')
+      : await import('@/queries/unique/nftListWithSearch.graphql')
+
     this.$apollo.addSmartQuery('nfts', {
-      query: nftListWithSearch,
+      query: query as unknown as DocumentNode,
       manual: true,
       // update: ({ nFTEntities }) => nFTEntities.nodes,
-      loadingKey: 'isLoading',
+      loadingKey: 'loadingState',
+      client: this.urlPrefix,
       result: this.handleResult,
       variables: () => {
         return {
           first: this.first,
           offset: this.offset,
-          denyList,
+          denyList: isRemark ? denyList : statemineDenyList,
           orderBy: this.searchQuery.sortBy,
-          search: this.buildSearchParam()
+          search: this.buildSearchParam(),
         }
-      }
+      },
     })
   }
 
@@ -189,21 +172,26 @@ export default class Gallery extends Vue {
     this.total = data.nFTEntities.totalCount
     this.nfts = data.nFTEntities.nodes.map((e: any) => ({
       ...e,
-      emoteCount: e.emotes?.totalCount
+      emoteCount: e?.emotes?.totalCount,
     }))
 
-    const storedMetadata = await getMany(
-      this.nfts.map(({ metadata }: any) => metadata)
+    const metadataList: string[] = this.nfts.map(
+      ({ metadata, collection }: NFTWithCollectionMeta) =>
+        metadata || collection.metadata
     )
+    const storedMetadata = await getMany(metadataList).catch(() => metadataList)
 
     storedMetadata.forEach(async (m, i) => {
       if (!m) {
         try {
-          const meta = await fetchNFTMetadata(this.nfts[i], getSanitizer(this.nfts[i].metadata, undefined, 'permafrost'))
+          const meta = await fetchNFTMetadata(
+            this.nfts[i],
+            getSanitizer(this.nfts[i].metadata, undefined, 'permafrost')
+          )
           Vue.set(this.nfts, i, {
             ...this.nfts[i],
             ...meta,
-            image: getSanitizer(meta.image || '')(meta.image || '')
+            image: getSanitizer(meta.image || '')(meta.image || ''),
           })
           update(this.nfts[i].metadata, () => meta)
         } catch (e) {
@@ -213,36 +201,44 @@ export default class Gallery extends Vue {
         Vue.set(this.nfts, i, {
           ...this.nfts[i],
           ...m,
-          image: getSanitizer(m.image || '')(m.image || '')
+          image: getSanitizer(m.image || '')(m.image || ''),
         })
       }
     })
 
-
-    this.prefetchPage(this.offset + this.first, this.offset + (3 * this.first))
+    // this.prefetchPage(this.offset + this.first, this.offset + (3 * this.first))
   }
-
 
   public async prefetchPage(offset: number, prefetchLimit: number) {
     try {
+      const isRemark = this.urlPrefix === 'rmrk'
+      const query = isRemark
+        ? await import('@/queries/nftListWithSearch.graphql')
+        : await import('@/queries/unique/nftListWithSearch.graphql')
       const nfts = this.$apollo.query({
-        query: nftListWithSearch,
+        query: query as unknown as DocumentNode,
+        client: this.urlPrefix,
         variables: {
           first: this.first,
           offset,
-          denyList,
+          denyList: isRemark ? denyList : statemineDenyList,
           orderBy: this.searchQuery.sortBy,
-          search: this.buildSearchParam()
-        }
+          search: this.buildSearchParam(),
+        },
       })
 
       const {
         data: {
-          nFTEntities: { nodes: nftList }
-        }
+          nFTEntities: { nodes: nftList },
+        },
       } = await nfts
 
-      const storedPromise = getMany(nftList.map(({ metadata }: any) => metadata))
+      const metadataList: string[] = this.nfts.map(
+        ({ metadata, collection }: NFTWithCollectionMeta) =>
+          metadata || collection.metadata
+      )
+
+      const storedPromise = getMany(metadataList).catch(() => metadataList)
 
       const storedMetadata = await storedPromise
 
@@ -263,7 +259,6 @@ export default class Gallery extends Vue {
         this.prefetchPage(offset + this.first, prefetchLimit)
       }
     }
-
   }
 
   private buildSearchParam(): Record<string, unknown>[] {
@@ -271,13 +266,13 @@ export default class Gallery extends Vue {
 
     if (this.searchQuery.search) {
       params.push({
-        name: { likeInsensitive: `%${this.searchQuery.search}%` }
+        name: { likeInsensitive: `%${this.searchQuery.search}%` },
       })
     }
 
     if (this.searchQuery.listed) {
       params.push({
-        price: { greaterThan: '0' }
+        price: { greaterThan: '0' },
       })
     }
 
@@ -289,13 +284,13 @@ export default class Gallery extends Vue {
     //   return basicAggQuery(expandedFilter(this.searchQuery, this.nfts))
     // }
 
-    return this.nfts as NFTWithMeta[]
+    return this.nfts as SearchedNftsWithMeta[]
 
     // return basicAggQuery(expandedFilter(this.searchQuery, this.nfts));
   }
 
   setFreezeframe() {
-    document.addEventListener('lazybeforeunveil', async e => {
+    document.addEventListener('lazybeforeunveil', async (e) => {
       const target = e.target as Image
       const type = target.dataset.type as string
       const isGif = type === 'image/gif'
@@ -304,7 +299,7 @@ export default class Gallery extends Vue {
         const ff = new Freezeframe(target, {
           trigger: false,
           overlay: true,
-          warnings: false
+          warnings: false,
         })
 
         target.ffInitialized = true
@@ -320,15 +315,17 @@ export default class Gallery extends Vue {
 </script>
 
 <style lang="scss">
+@import '@/styles/variables';
+
 .card-image__burned {
   filter: blur(7px);
 }
 
-.gallery {
-  @media screen and (max-width: 1023px) {
-    padding: 0 15px;
-  }
+.remove-margin nav {
+  margin-bottom: 0 !important;
+}
 
+.gallery {
   &__image-wrapper {
     position: relative;
     margin: auto;
@@ -381,10 +378,6 @@ export default class Gallery extends Vue {
     float: right;
   }
 
-  .is-color-pink {
-    color: #d32e79;
-  }
-
   .is-absolute {
     position: absolute;
   }
@@ -401,7 +394,7 @@ export default class Gallery extends Vue {
       border-radius: 8px;
       position: relative;
       overflow: hidden;
-      box-shadow: 0px 0px 10px 0.5px #d32e79;
+      border: 2px solid $primary-light;
 
       &-image {
         .ff-canvas {
@@ -410,7 +403,7 @@ export default class Gallery extends Vue {
 
         &__emotes {
           position: absolute;
-          background-color: #d32e79;
+          background-color: $primary-light;
           border-radius: 4px;
           padding: 3px 8px;
           color: #fff;
@@ -423,7 +416,7 @@ export default class Gallery extends Vue {
 
         &__price {
           position: absolute;
-          background-color: #363636;
+          background-color: $grey-darker;
           border-radius: 4px;
           padding: 3px 8px;
           color: #fff;

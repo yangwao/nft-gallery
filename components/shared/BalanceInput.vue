@@ -1,27 +1,18 @@
 <template>
   <div class="arguments-wrapper">
-    <b-field
-      :label="$t(label)"
-      class="balance"
-    >
+    <b-field :label="$t(label)" class="balance">
       <b-input
         v-model="inputValue"
         type="number"
         step="0.001"
         min="0"
-        @input="handleInput"
-      />
+        @input="handleInput" />
       <p class="control balance">
         <b-select
           v-model="selectedUnit"
           :disabled="!calculate"
-          @input="handleInput"
-        >
-          <option
-            v-for="u in units"
-            :key="u.value"
-            :value="u.value"
-          >
+          @input="handleInput">
+          <option v-for="u in units" :key="u.value" :value="u.value">
             {{ u.name }}
           </option>
         </b-select>
@@ -30,7 +21,7 @@
   </div>
 </template>
 
-<script lang="ts" >
+<script lang="ts">
 import { Component, Prop, Emit, mixins } from 'nuxt-property-decorator'
 import { units as defaultUnits } from '@/params/constants'
 import { Unit } from '@/params/types'
@@ -39,11 +30,11 @@ import ChainMixin from '@/utils/mixins/chainMixin'
 
 @Component
 export default class BalanceInput extends mixins(ChainMixin) {
-  @Prop({ type: [Number, String], default: 0 }) value!: number;
-  protected units: Unit[] = defaultUnits;
-  private selectedUnit = 1;
-  @Prop({ default: 'balance' }) public label!: string;
-  @Prop({ default: true }) public calculate!: boolean;
+  @Prop({ type: [Number, String], default: 0 }) value!: number
+  protected units: Unit[] = defaultUnits
+  private selectedUnit = 1
+  @Prop({ default: 'balance' }) public label!: string
+  @Prop({ default: true }) public calculate!: boolean
 
   get inputValue(): number {
     return this.value
@@ -54,7 +45,7 @@ export default class BalanceInput extends mixins(ChainMixin) {
   }
 
   formatSelectedValue(value: number): number {
-    return  value * (10**this.decimals) * this.selectedUnit
+    return value * 10 ** this.decimals * this.selectedUnit
   }
 
   get calculatedBalance() {

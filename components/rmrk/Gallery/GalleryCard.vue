@@ -1,78 +1,46 @@
 <template>
   <div
     class="card nft-card"
-    :class="{ 'is-current-owner': accountIsCurrentOwner() }"
-  >
+    :class="{ 'is-current-owner': accountIsCurrentOwner() }">
     <LinkResolver
       class="nft-card__skeleton"
       :route="route"
       :link="link"
       :param="id"
-      tag="a"
-    >
-      <div
-        v-if="image"
-        class="card-image"
-      >
-        <span
-          v-if="emoteCount"
-          class="card-image__emotes"
-        >
+      tag="a">
+      <div v-if="image" class="card-image">
+        <span v-if="emoteCount" class="card-image__emotes">
           <b-icon icon="heart" />
           <span class="card-image__emotes__count">{{ emoteCount }}</span>
         </span>
         <BasicImage
           :src="image"
           :alt="title"
-          custom-class="gallery__image-wrapper"
-        />
-        <span
-          v-if="price > 0"
-          class="card-image__price"
-        >
-          <Money
-            :value="price"
-            inline
-          />
+          custom-class="gallery__image-wrapper" />
+        <span v-if="price > 0 && showPriceValue" class="card-image__price">
+          <Money :value="price" inline />
         </span>
       </div>
 
-      <div
-        v-else
-        class="card-image"
-      >
-        <span
-          v-if="emoteCount"
-          class="card-image__emotes"
-        >
+      <div v-else class="card-image">
+        <span v-if="emoteCount" class="card-image__emotes">
           <b-icon icon="heart" />
           <span class="card-image__emotes__count">{{ emoteCount }}</span>
         </span>
 
-        <b-image
-          :src="placeholder"
-          alt="Simple image"
-          ratio="1by1"
-        />
+        <b-image :src="placeholder" alt="Simple image" ratio="1by1" />
 
-        <span
-          v-if="price > 0"
-          class="card-image__price"
-        >
-          <Money
-            :value="price"
-            inline
-          />
+        <span v-if="price > 0" class="card-image__price">
+          <Money :value="price" inline />
         </span>
       </div>
 
       <div class="card-content">
         <span
           class="title mb-0 is-4 has-text-centered has-text-primary"
-          :title="name"
-        >
+          :title="name">
           <div class="has-text-overflow-ellipsis">
-            {{ name }}
+            {{ nftName }}
           </div>
         </span>
       </div>
@@ -80,12 +48,13 @@
   </div>
 </template>
 
-<script lang="ts" >
-import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
+<script lang="ts">
+import { Component, mixins, Prop, Watch } from 'nuxt-property-decorator'
 import { get, update } from 'idb-keyval'
 import shouldUpdate from '@/utils/shouldUpdate'
 import { fetchNFTMetadata, getSanitizer } from '../utils'
 import { NFT } from '../service/scheme'
+import AuthMixin from '@/utils/mixins/authMixin'
 
 const components = {
   LinkResolver: () => import('@/components/shared/LinkResolver.vue'),
@@ -94,20 +63,21 @@ const components = {
 }
 
 @Component({ components })
-export default class GalleryCard extends Vue {
-  @Prop({ default: '/rmrk/gallery' }) public route!: string;
-  @Prop({ default: 'rmrk/gallery' }) public link!: string;
-  @Prop() public id!: string;
-  @Prop() public name!: string;
-  protected image = '';
-  protected title = '';
-  @Prop() public emoteCount!: string | number;
-  @Prop() public imageType!: string;
-  @Prop() public price!: string;
-  @Prop() public metadata!: string;
-  @Prop() public currentOwner!: string;
+export default class GalleryCard extends mixins(AuthMixin) {
+  @Prop({ type: String, default: '/rmrk/gallery' }) public route!: string
+  @Prop({ type: String, default: 'rmrk/gallery' }) public link!: string
+  @Prop(String) public id!: string
+  @Prop(String) public name!: string
+  protected image = ''
+  protected title = ''
+  @Prop([String, Number]) public emoteCount!: string | number
+  @Prop(String) public imageType!: string
+  @Prop(String) public price!: string
+  @Prop(String) public metadata!: string
+  @Prop(String) public currentOwner!: string
+  @Prop(Boolean) public listed!: boolean
 
-  private placeholder = '/koda300x300.svg';
+  private placeholder = '/placeholder.webp'
 
   async mounted() {
     if (this.metadata) {
@@ -134,8 +104,12 @@ export default class GalleryCard extends Vue {
     }
   }
 
-  get accountId() {
-    return this.$store.getters.getAuthAddress
+  get showPriceValue(): boolean {
+    return this.listed || this.$store.getters['preferences/getShowPriceValue']
+  }
+
+  get nftName(): string {
+    return this.name || this.title
   }
 
   public accountIsCurrentOwner() {
@@ -145,11 +119,13 @@ export default class GalleryCard extends Vue {
 </script>
 
 <style lang="scss">
+@import '@/styles/variables';
+
 .nft-card {
   border-radius: 8px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0px 2px 5px 0.5px #d32e79;
+  border: 2px solid $primary-light;
 
   &.is-current-owner {
     box-shadow: 0px 2px 5px 0.5px #41b883;
@@ -171,7 +147,7 @@ export default class GalleryCard extends Vue {
     .card-image {
       &__emotes {
         position: absolute;
-        background-color: #d32e79;
+        background-color: $primary-light;
         border-radius: 4px;
         padding: 3px 8px;
         color: #fff;
@@ -184,7 +160,7 @@ export default class GalleryCard extends Vue {
 
       &__price {
         position: absolute;
-        background-color: #363636;
+        background-color: $grey-darker;
         border-radius: 4px;
         padding: 3px 8px;
         color: #fff;

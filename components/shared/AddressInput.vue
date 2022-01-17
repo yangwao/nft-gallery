@@ -1,14 +1,7 @@
 <template>
   <div>
-    <b-field
-      :type="type"
-      :message="err"
-      :label="$t(label)"
-    >
-      <b-input
-        v-model="inputValue"
-        @input="handleInput"
-      />
+    <b-field :type="type" :message="err" :label="$t(label)">
+      <b-input v-model="inputValue" @input="handleInput" />
     </b-field>
   </div>
 </template>
@@ -21,11 +14,11 @@ import { Component, Emit, Prop, Vue } from 'nuxt-property-decorator'
 
 @Component({})
 export default class AddressInput extends Vue {
-  @Prop(String) public value!: string;
-  private err: string | null = '';
-  @Prop({ type: String, default: 'insert address' }) public label!: string;
-  @Prop(Boolean) public emptyOnError!: boolean;
-  @Prop({ type: Boolean, default: true }) public strict!: boolean;
+  @Prop(String) public value!: string
+  private err: string | null = ''
+  @Prop({ type: String, default: 'insert address' }) public label!: string
+  @Prop(Boolean) public emptyOnError!: boolean
+  @Prop({ type: Boolean, default: true }) public strict!: boolean
 
   get inputValue(): string {
     return this.value
@@ -36,7 +29,7 @@ export default class AddressInput extends Vue {
   }
 
   get type(): string {
-    return this.err ? 'is-danger': ''
+    return this.err ? 'is-danger' : ''
   }
 
   @Debounce(500)

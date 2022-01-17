@@ -13,22 +13,22 @@
       aria-previous-label="Previous page"
       aria-page-label="Page"
       aria-current-label="Current page"
-      @change="onPageChange"
-    >
+      @change="onPageChange">
     </b-pagination>
-    <b-button
-      class="ml-2 magicBtn"
-      title="Go to random page"
-      v-if="hasMagicBtn"
-      type="is-primary"
-      icon-left="magic"
-      @click="goToRandomPage"
-    >
-    </b-button>
+    <b-tooltip :label="$i18n.t('tooltip.random')">
+      <b-button
+        class="ml-2 magicBtn"
+        title="Go to random page"
+        v-if="hasMagicBtn"
+        type="is-primary"
+        icon-left="dice"
+        @click="goToRandomPage">
+      </b-button>
+    </b-tooltip>
   </div>
 </template>
 
-<script lang="ts" >
+<script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import { exist } from './Search/exist'
 import { Debounce } from 'vue-debounce-decorator'
@@ -42,7 +42,7 @@ export default class Pagination extends Vue {
   @Prop({ default: 20 }) public perPage!: number
   @Prop(Boolean) replace!: boolean
   @Prop(Boolean) preserveScroll!: boolean
-  @Prop(Boolean) hasMagicBtn!: boolean;
+  @Prop(Boolean) hasMagicBtn!: boolean
 
   public mounted() {
     exist(this.$route.query.page, (val) => {
@@ -98,9 +98,7 @@ export default class Pagination extends Vue {
 }
 </script>
 <style lang="scss">
-
- .magicBtn {
+.magicBtn {
   border-width: 1px;
- }
-
+}
 </style>

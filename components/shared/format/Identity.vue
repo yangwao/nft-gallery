@@ -1,34 +1,55 @@
 <template>
+  <!-- <div> -->
   <component
     :is="is"
-    v-if="(showTwitter && twitter) || !showTwitter"
+    v-if="
+      ((showTwitter && twitter) || !showTwitter) &&
+      ((showDiscord && discord) || !showDiscord)
+    "
     v-clipboard:copy="address"
-    :class="{ aligned: verticalAlign, overflowWrap: noOwerflow }"
-  >
-    <template v-if="showTwitter && twitter">
+    :class="{ aligned: verticalAlign, overflowWrap: noOwerflow }">
+    <template v-if="(showTwitter && twitter) || (showDiscord && discord)">
       <a
         :href="`https://twitter.com/${twitter}`"
         class="twitter-link"
         target="_blank"
         rel="noopener noreferrer"
-      >
-        <b-icon
-          pack="fab"
-          icon="twitter"
-        />
+        v-if="showTwitter && twitter">
+        <b-icon pack="fab" icon="twitter" />
         <span class="aligned">
           {{ twitter | toString }}
         </span>
       </a>
+
+      <div v-if="showDiscord && discord" class="is-flex is-align-items-center">
+        <b-icon pack="fab" icon="discord" />
+        <span class="aligned ml-2">
+          {{ discord | toString }}
+        </span>
+      </div>
     </template>
     <template v-else>
-      <span v-if="showOnchainIdentity" class="is-inline-flex is-align-items-center">
+      <span
+        v-if="showOnchainIdentity"
+        class="is-inline-flex is-align-items-center">
         {{ shortenedAddress | toString }}
-        <img v-if="isFetchingIdentity" src="/infinity.svg" class="ml-1 infinity-loader">
+        <img
+          v-if="isFetchingIdentity"
+          src="/infinity.svg"
+          class="ml-1 infinity-loader" />
         <template v-else>
-          <span v-if="identity.display" class="ml-1">({{ identity.display }})</span>
+          <span v-if="identity.display" class="ml-1"
+            >({{ identity.display }})</span
+          >
         </template>
       </span>
+      <template v-if="!hideIdentityPopover">
+        <IdentityPopover :identity="{ ...identity, address }">
+          <template #trigger>
+            {{ name | toString }}
+          </template>
+        </IdentityPopover>
+      </template>
       <span v-else>
         {{ name | toString }}
       </span>
@@ -49,20 +70,24 @@ import { get, update } from 'idb-keyval'
 import { identityStore } from '@/utils/idbStore'
 import shouldUpdate from '@/utils/shouldUpdate'
 
-type Address = string | GenericAccountId | undefined;
-type IdentityFields = Record<string, string>;
+type Address = string | GenericAccountId | undefined
+type IdentityFields = Record<string, string>
 
-const components = {}
+const components = {
+  IdentityPopover: () => import('@/components/shared/IdentityPopover.vue'),
+}
 
 @Component({ components })
 export default class Identity extends mixins(InlineMixin) {
-  @Prop() public address!: Address;
-  @Prop(Boolean) public verticalAlign!: boolean;
-  @Prop(Boolean) public noOwerflow!: boolean;
-  @Prop(Boolean) public emit!: boolean;
-  @Prop(Boolean) public showTwitter!: boolean;
-  @Prop(Boolean) public showOnchainIdentity!: boolean;
-  private identity: IdentityFields = emptyObject<IdentityFields>();
+  @Prop() public address!: Address
+  @Prop(Boolean) public verticalAlign!: boolean
+  @Prop(Boolean) public noOwerflow!: boolean
+  @Prop(Boolean) public emit!: boolean
+  @Prop(Boolean) public showTwitter!: boolean
+  @Prop(Boolean) public showDiscord!: boolean
+  @Prop(Boolean) public showOnchainIdentity!: boolean
+  @Prop(Boolean) public hideIdentityPopover!: boolean
+  private identity: IdentityFields = emptyObject<IdentityFields>()
   private isFetchingIdentity = false
 
   get shortenedAddress(): Address {
@@ -71,18 +96,23 @@ export default class Identity extends mixins(InlineMixin) {
 
   get name(): Address {
     const name = this.identity.display
-    return name as string || this.shortenedAddress
+    return (name as string) || this.shortenedAddress
   }
 
   get twitter(): Address {
     const twitter = this.identity.twitter
-    return twitter as string || ''
+    return (twitter as string) || ''
+  }
+
+  get discord(): Address {
+    const discord = this.identity.discord
+    return discord
   }
 
   @Watch('address', { immediate: true })
-  async watchAddress(newAddress: Address,  oldAddress: Address) {
+  async watchAddress(newAddress: Address, oldAddress: Address) {
     if (shouldUpdate(newAddress, oldAddress)) {
-      this.identityOf(newAddress).then(id => this.identity = id)
+      this.identityOf(newAddress).then((id) => (this.identity = id))
     }
   }
 
@@ -118,7 +148,9 @@ export default class Identity extends mixins(InlineMixin) {
   }
 
   private resolveAddress(account: Address): string {
-    return account instanceof GenericAccountId ? account.toString() : account || ''
+    return account instanceof GenericAccountId
+      ? account.toString()
+      : account || ''
   }
 
   protected async fetchIdentity(address: string): Promise<IdentityFields> {
@@ -177,6 +209,6 @@ export default class Identity extends mixins(InlineMixin) {
 }
 
 .infinity-loader {
-  height: 20px
+  height: 20px;
 }
 </style>

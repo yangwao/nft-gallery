@@ -9,9 +9,13 @@
           <a
             :href="`https://kusama.subscan.io/account/${id}`"
             target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Identity ref="identity" :address="id" inline emit @change="handleIdentity" />
+            rel="noopener noreferrer">
+            <Identity
+              ref="identity"
+              :address="id"
+              inline
+              emit
+              @change="handleIdentity" />
           </a>
         </h1>
       </div>
@@ -23,8 +27,12 @@
           {{ $t('profile.user') }}
         </div>
         <div class="subtitle is-size-6">
-          <ProfileLink :address="id" :inline="true" :showTwitter="true"/>
-          <a :href="`https://sub.id/#/${id}`" target="_blank" rel="noopener noreferrer" class="is-inline-flex is-align-items-center pt-2">
+          <ProfileLink :address="id" :inline="true" showTwitter showDiscord />
+          <a
+            :href="`https://sub.id/#/${id}`"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="is-inline-flex is-align-items-center pt-2">
             <figure class="image is-24x24 subid__less-margin">
               <img alt="subid" src="/subid.svg" />
             </figure>
@@ -32,95 +40,122 @@
           </a>
         </div>
       </div>
-        <div class="column has-text-right">
-          <Sharing
-            class="mb-2"
-            v-if="!sharingVisible"
-            label="Check this awesome Profile on %23KusamaNetwork %23KodaDot"
-            :iframe="iframeSettings"
-          >
-            <NuxtLink :to="visitMetaverse">
-              <b-button type="is-primary" icon-left="vr-cardboard" />
-            </NuxtLink>
-            <DonationButton :address="id" />
-          </Sharing>
+      <div class="column has-text-right">
+        <Sharing
+          class="mb-2"
+          v-if="!sharingVisible"
+          :label="$t('sharing.profile')"
+          :iframe="iframeSettings">
+          <NuxtLink :to="visitMetaverse">
+            <b-button type="is-primary" icon-left="vr-cardboard" />
+          </NuxtLink>
+          <DonationButton :address="id" />
+        </Sharing>
       </div>
     </div>
 
     <b-tabs
       :class="{ 'invisible-tab': sharingVisible }"
+      class="tabs-container-mobile"
       v-model="activeTab"
       destroy-on-hide
-      expanded
-    >
-      <b-tab-item value="nft">
+      expanded>
+      <b-tab-item value="nft" :headerClass="{ 'is-hidden': !totalCollections }">
         <template #header>
-          {{ $t("profile.created") }}
-          <span class="tab-counter" v-if="totalCreated">{{ totalCreated }}</span>
+          <b-tooltip
+            :label="`${$i18n.t('tooltip.created')} ${shortendId}`"
+            append-to-body>
+            {{ $t('profile.created') }}
+            <span class="tab-counter" v-if="totalCreated">{{
+              totalCreated
+            }}</span>
+          </b-tooltip>
         </template>
         <PaginatedCardList
           :id="id"
           :query="nftListByIssuer"
           @change="totalCreated = $event"
           :account="id"
-          :showSearchBar="true"
-        />
+          :showSearchBar="true" />
       </b-tab-item>
       <b-tab-item
         :label="`Collections - ${totalCollections}`"
         value="collection"
-      >
-        <Pagination hasMagicBtn replace :total="totalCollections" v-model="currentCollectionPage" />
+        :headerClass="{ 'is-hidden': !totalCollections }">
+        <template #header>
+          <b-tooltip
+            :label="`${$i18n.t('tooltip.collections')} ${shortendId}`"
+            append-to-body>
+            {{ $t('Collections') }}
+            <span class="tab-counter" v-if="totalCollections">{{
+              totalCollections
+            }}</span>
+          </b-tooltip>
+        </template>
+        <div class="is-flex is-justify-content-flex-end">
+          <Layout class="mr-5" />
+          <Pagination
+            hasMagicBtn
+            replace
+            :total="totalCollections"
+            v-model="currentCollectionPage" />
+        </div>
         <GalleryCardList
           :items="collections"
+          type="collectionDetail"
           route="/rmrk/collection"
           link="rmrk/collection"
-        />
+          horizontalLayout />
         <Pagination
           replace
           class="pt-5 pb-5"
           :total="totalCollections"
-          v-model="currentCollectionPage"
-        />
+          v-model="currentCollectionPage" />
       </b-tab-item>
-      <b-tab-item value="sold">
+      <b-tab-item
+        value="sold"
+        :headerClass="{ 'is-hidden': !totalCollections }">
         <template #header>
-          {{ $t("profile.sold") }}
-          <span class="tab-counter" v-if="totalSold">{{ totalSold }}</span>
+          <b-tooltip
+            :label="`${$i18n.t('tooltip.sold')} ${shortendId}`"
+            append-to-body>
+            {{ $t('profile.sold') }}
+            <span class="tab-counter" v-if="totalSold">{{ totalSold }}</span>
+          </b-tooltip>
         </template>
         <PaginatedCardList
           :id="id"
           :query="nftListSold"
           @change="totalSold = $event"
           :account="id"
-        />
+          showSearchBar />
       </b-tab-item>
       <b-tab-item value="collected">
         <template #header>
-          {{ $t("profile.collected") }}
-          <span class="tab-counter" v-if="totalCollected">{{ totalCollected }}</span>
+          <b-tooltip
+            :label="`${$i18n.t('tooltip.collected')} ${shortendId}`"
+            append-to-body>
+            {{ $t('profile.collected') }}
+            <span class="tab-counter" v-if="totalCollected">{{
+              totalCollected
+            }}</span>
+          </b-tooltip>
         </template>
         <PaginatedCardList
           :id="id"
           :query="nftListCollected"
           @change="totalCollected = $event"
           :account="id"
-        />
+          showSearchBar />
       </b-tab-item>
-
-      <!-- <b-tab-item label="Packs" value="pack">
-        <span>TODO: Reintroduce</span>
-        <GalleryCardList :items="packs" type="packDetail" link="rmrk/pack" />
-      </b-tab-item> -->
     </b-tabs>
   </section>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from 'nuxt-property-decorator'
+import { Component, mixins, Vue, Watch } from 'nuxt-property-decorator'
 import { notificationTypes, showNotification } from '@/utils/notification'
 import { sanitizeIpfsUrl, fetchNFTMetadata } from '@/components/rmrk/utils'
-import { exist } from '@/components/rmrk/Gallery/Search/exist'
 import { CollectionWithMeta, Pack } from '@/components/rmrk/service/scheme'
 import isShareMode from '@/utils/isShareMode'
 import shouldUpdate from '@/utils/shouldUpdate'
@@ -130,6 +165,7 @@ import nftListByIssuer from '@/queries/nftListByIssuer.graphql'
 import nftListCollected from '@/queries/nftListCollected.graphql'
 import nftListSold from '@/queries/nftListSold.graphql'
 import firstNftByIssuer from '@/queries/firstNftByIssuer.graphql'
+import PrefixMixin from '@/utils/mixins/prefixMixin'
 
 const components = {
   GalleryCardList: () =>
@@ -142,61 +178,31 @@ const components = {
   DonationButton: () => import('@/components/transfer/DonationButton.vue'),
   Avatar: () => import('@/components/shared/Avatar.vue'),
   ProfileLink: () => import('@/components/rmrk/Profile/ProfileLink.vue'),
+  Layout: () => import('@/components/rmrk/Gallery/Layout.vue'),
 }
 
 const eq = (tab: string) => (el: string) => tab === el
 
 @Component<Profile>({
-  components,
-  metaInfo() {
+  name: 'Profile',
+  head() {
+    const title = 'NFT Artist Profile on KodaDot'
+    const metaData = {
+      title,
+      type: 'profile',
+      description:
+        this.firstNFTData.description || 'Find more NFTs from this creator',
+      url: `/westmint/u/${this.id}`,
+      image: this.firstNFTData.image || this.defaultNFTImage,
+    }
     return {
-      meta: [
-        {
-          property: 'og:title',
-          vmid: 'og:title',
-          content: 'NFT Artist Profile on KodaDot',
-        },
-        {
-          property: 'og:description',
-          vmid: 'og:description',
-          content:
-            (this.firstNFTData.description as string) ||
-            'Find more NFTs from this creator',
-        },
-        {
-          property: 'og:image',
-          vmid: 'og:image',
-          content:
-            (this.firstNFTData.image as string) ||
-            (this.defaultNFTImage as string),
-        },
-        { property: 'twitter:site', content: '@KodaDot' },
-        { property: 'twitter:card', content: 'summary_large_image' },
-        {
-          property: 'twitter:title',
-          vmid: 'twitter:title',
-          content: 'NFT Artist Profile on KodaDot',
-        },
-        {
-          property: 'twitter:description',
-          vmid: 'twitter:description',
-          content:
-            (this.firstNFTData.description as string) ||
-            'Find more NFTs from this creator',
-        },
-        {
-          property: 'twitter:image',
-          vmid: 'twitter:image',
-          content:
-            (this.firstNFTData.image as string) ||
-            (this.defaultNFTImage as string),
-        },
-      ],
+      title,
+      meta: [...this.$seoMeta(metaData)],
     }
   },
+  components,
 })
-export default class Profile extends Vue {
-  public activeTab = 'nft'
+export default class Profile extends mixins(PrefixMixin) {
   public firstNFTData: any = {}
   protected id = ''
   protected shortendId = ''
@@ -226,9 +232,6 @@ export default class Profile extends Vue {
 
   public async mounted() {
     await this.fetchProfile()
-    exist(this.$route.query.tab, (val) => {
-      this.activeTab = val
-    })
   }
 
   public checkId() {
@@ -236,6 +239,17 @@ export default class Profile extends Vue {
       this.id = this.$route.params.id
       this.shortendId = shortAddress(this.id)
     }
+  }
+
+  get activeTab(): string {
+    return (this.$route.query.tab as string) || 'nft'
+  }
+
+  set activeTab(val) {
+    this.$route.query.page = ''
+    this.$router.replace({
+      query: { tab: val },
+    })
   }
 
   get sharingVisible(): boolean {
@@ -260,7 +274,7 @@ export default class Profile extends Vue {
 
   get defaultNFTImage(): string {
     const url = new URL(window.location.href)
-    return `${url.protocol}//${url.hostname}/koda300x300.svg`
+    return `${url.protocol}//${url.hostname}/placeholder.webp`
   }
 
   get visitMetaverse(): string {
@@ -269,11 +283,11 @@ export default class Profile extends Vue {
 
   protected async fetchProfile() {
     this.checkId()
-    this.checkActiveTab()
 
     try {
       this.$apollo.addSmartQuery('collections', {
         query: collectionList,
+        client: this.urlPrefix,
         manual: true,
         // update: ({ nFTEntities }) => nFTEntities.nodes,
         loadingKey: 'isLoading',
@@ -290,6 +304,7 @@ export default class Profile extends Vue {
 
       this.$apollo.addSmartQuery('firstNft', {
         query: firstNftByIssuer,
+        client: this.urlPrefix,
         manual: true,
         loadingKey: 'isLoading',
         result: this.handleResult,
@@ -340,25 +355,6 @@ export default class Profile extends Vue {
     this.riot = identityFields?.riot as string
     this.web = identityFields?.web as string
     this.legal = identityFields?.legal as string
-  }
-
-  public checkActiveTab() {
-    if (
-      this.$route.params.tab &&
-      ['nft', 'collection', 'pack'].some(eq(this.$route.params.tab))
-    ) {
-      this.activeTab = this.$route.params.tab
-    }
-  }
-
-  @Watch('activeTab')
-  protected onTabChange(val: string, oldVal: string) {
-    if (shouldUpdate(val, oldVal)) {
-      this.$router.replace({
-        path: String(this.$route.path),
-        query: { tab: val },
-      })
-    }
   }
 
   @Watch('$route.params.id')

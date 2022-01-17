@@ -6,7 +6,7 @@
         <div class="container">
           <div class="columns is-centered">
             <div class="column is-half">
-              <router-view />
+              <Nuxt />
             </div>
           </div>
         </div>
@@ -23,21 +23,7 @@ import keyring from '@polkadot/ui-keyring'
 import isShareMode from '@/utils/isShareMode'
 import correctFormat from '@/utils/ss58Format'
 
-@Component<Dashboard>({
-  metaInfo() {
-    return {
-      title: 'KodaDot - Kusama NFT Market Explorer',
-      titleTemplate: '%s | Low Carbon NFTs',
-      meta: [
-        { property: 'og:type', content: 'website' },
-        // { property: 'og:url', content: 'https://nft.kodadot.xyz'},
-        { property: 'og:locale', content: 'en_US' },
-        { property: 'twitter:card', content: 'summary_large_image' },
-        { property: 'twitter:site', content: '@KodaDot' }
-      ]
-    }
-  },
-})
+@Component<Dashboard>({})
 export default class Dashboard extends Vue {
   get chainProperties() {
     return this.$store.getters['chain/getChainProperties']
@@ -52,7 +38,7 @@ export default class Dashboard extends Vue {
     keyring.loadAll({
       ss58Format: correctFormat(this.ss58Format),
       type: 'sr25519',
-      isDevelopment
+      isDevelopment,
     })
   }
 

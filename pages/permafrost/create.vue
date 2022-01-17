@@ -1,21 +1,16 @@
 <template>
   <section>
-    <br>
-    <Loader
-      v-model="isLoading"
-      :status="status"
-    />
+    <br />
+    <Loader v-model="isLoading" :status="status" />
     <div class="box">
       <p class="title is-size-3">
         <!-- {{ $t('mint.context') }} -->
         Create NFT using PermaFrost
       </p>
-      <p class="subtitle is-size-7">
-        {{ $t("using") }} {{ version }}
-      </p>
+      <p class="subtitle is-size-7">{{ $t('using') }} {{ version }}</p>
       <b-field>
         <div>
-          {{ $t("computed id") }}: <b>{{ rmrkId }}</b>
+          {{ $t('computed id') }}: <b>{{ rmrkId }}</b>
         </div>
       </b-field>
       <b-field>
@@ -26,82 +21,51 @@
         v-model="file"
         label="Drop your NFT here or click to upload or simply paste image from clipboard. We support various media types (BMP, GIF, JPEG, PNG, SVG, TIFF, WEBP)"
         expanded
-        preview
-      />
+        preview />
 
-      <b-field
-        grouped
-        :label="$i18n.t('Name')"
-      >
+      <b-field grouped :label="$i18n.t('Name')">
         <b-input
           v-model="rmrkMint.name"
           placeholder="Name your NFT"
           expanded
           class="mr-0"
-          spellcheck="true"
-        />
-        <Tooltip
-          iconsize="is-medium"
-          :label="$i18n.t('tooltip.name')"
-        />
+          spellcheck="true" />
+        <Tooltip iconsize="is-medium" :label="$i18n.t('tooltip.name')" />
       </b-field>
-      <b-field
-        grouped
-        :label="$i18n.t('Symbol')"
-        class="mb-0"
-      >
+      <b-field grouped :label="$i18n.t('Symbol')" class="mb-0">
         <b-input
           v-model="rmrkMint.symbol"
           placeholder="3-5 character long name"
           maxlength="10"
           expanded
           class="mr-0"
-          @keydown.native.space.prevent
-        />
-        <Tooltip
-          iconsize="is-medium"
-          :label="$i18n.t('tooltip.symbol')"
-        />
+          @keydown.native.space.prevent />
+        <Tooltip iconsize="is-medium" :label="$i18n.t('tooltip.symbol')" />
       </b-field>
 
-      <b-field
-        :label="$i18n.t('Collection description')"
-        class="mb-0"
-      >
+      <b-field :label="$i18n.t('Collection description')" class="mb-0">
         <b-input
           v-model="meta.description"
           maxlength="500"
           type="textarea"
           placeholder="Describe your NFT"
-          spellcheck="true"
-        />
+          spellcheck="true" />
       </b-field>
 
-      <b-field
-        grouped
-        :label="$i18n.t('Edition')"
-      >
+      <b-field grouped :label="$i18n.t('Edition')">
         <b-numberinput
           v-model="rmrkMint.max"
           placeholder="1 is minumum"
           expanded
-          :min="1"
-        />
-        <Tooltip
-          iconsize="is-medium"
-          :label="$i18n.t('tooltip.edition')"
-        />
+          :min="1" />
+        <Tooltip iconsize="is-medium" :label="$i18n.t('tooltip.edition')" />
       </b-field>
 
       <AttributeTagInput
         v-model="rmrkMint.tags"
-        placeholder="Get discovered easier through tags"
-      />
+        placeholder="Get discovered easier through tags" />
 
-      <BalanceInput
-        label="Price"
-        @input="updateMeta"
-      />
+      <BalanceInput label="Price" @input="updateMeta" />
       <b-message
         v-if="price"
         icon="exclamation-triangle"
@@ -109,19 +73,15 @@
         title="Additional transaction"
         type="is-primary"
         has-icon
-        aria-close-label="Close message"
-      >
-        <span
-          class="has-text-primary"
-        >Setting the price now requires making an additional
-          transaction.</span>
+        aria-close-label="Close message">
+        <span class="has-text-primary"
+          >Setting the price now requires making an additional
+          transaction.</span
+        >
       </b-message>
 
       <b-field>
-        <PasswordInput
-          v-model="password"
-          :account="accountId"
-        />
+        <PasswordInput v-model="password" :account="accountId" />
       </b-field>
       <b-field>
         <b-button
@@ -130,17 +90,13 @@
           :disabled="disabled"
           :loading="isLoading"
           outlined
-          @click="sub"
-        >
-          {{ $t("mint.submit") }}
+          @click="sub">
+          {{ $t('mint.submit') }}
         </b-button>
       </b-field>
       <b-field>
-        <b-switch
-          v-model="hasToS"
-          :rounded="false"
-        >
-          {{ $t("termOfService.accept") }}
+        <b-switch v-model="hasToS" :rounded="false">
+          {{ $t('termOfService.accept') }}
         </b-switch>
       </b-field>
     </div>
@@ -152,10 +108,7 @@ import { Component, mixins } from 'nuxt-property-decorator'
 import { emptyObject } from '@/utils/empty'
 import Support from '@/components/shared/Support.vue'
 import Connector from '@vue-polkadot/vue-api'
-import exec, {
-  execResultValue,
-  txCb
-} from '@/utils/transactionExecutor'
+import exec, { execResultValue, txCb } from '@/utils/transactionExecutor'
 import { notificationTypes, showNotification } from '@/utils/notification'
 import SubscribeMixin from '@/utils/mixins/subscribeMixin'
 import RmrkVersionMixin from '@/utils/mixins/rmrkVersionMixin'
@@ -164,9 +117,9 @@ import {
   SimpleNFT,
   NFTMetadata,
   NFT,
-  getNftId
+  getNftId,
 } from '@/components/rmrk/service/scheme'
-import { permaStore } from '@/proxy'
+import { permaStore } from '@/utils/proxy'
 import { formatBalance } from '@polkadot/util'
 import { generateId } from '@/components/rmrk/service/Consolidator'
 import { supportTx, calculateCost, offsetTx } from '@/utils/support'
@@ -182,50 +135,31 @@ const components = {
   PasswordInput: () => import('@/components/shared/PasswordInput.vue'),
   Tooltip: () => import('@/components/shared/Tooltip.vue'),
   Support,
-  AttributeTagInput: () => import('@/components/rmrk/Create/AttributeTagInput.vue'),
+  AttributeTagInput: () =>
+    import('@/components/rmrk/Create/AttributeTagInput.vue'),
   BalanceInput: () => import('@/components/shared/BalanceInput.vue'),
   Money: () => import('@/components/shared/format/Money.vue'),
   Loader: () => import('@/components/shared/Loader.vue'),
-  ArweaveUploadSwitch: () => import('@/components/rmrk/Create/ArweaveUploadSwitch.vue')
+  ArweaveUploadSwitch: () =>
+    import('@/components/rmrk/Create/ArweaveUploadSwitch.vue'),
 }
 
 @Component<PermaMint>({
-  metaInfo() {
+  components,
+  head() {
+    const title = 'KodaDot | Low fees and low carbon minting'
+    const metaData = {
+      title,
+      type: 'article',
+      description: 'Create carbonless NFTs with low on-chain fees',
+      url: '/permafrost/create',
+      image: `${this.$config.baseUrl}/k_card_mint.png`,
+    }
     return {
-      meta: [
-        {
-          property: 'og:title',
-          content: 'KodaDot | Low fees and low carbon minting'
-        },
-        { property: 'og:url', content: 'https://nft.kodadot.xyz' },
-        {
-          property: 'og:description',
-          content: 'Create carbonless NFTs with low on-chain fees'
-        },
-        {
-          property: 'og:site_name',
-          content: 'Low fees and low carbon minting'
-        },
-        {
-          property: 'og:image',
-          content: 'https://nft.kodadot.xyz/kodadot_mint.jpg'
-        },
-        {
-          property: 'twitter:title',
-          content: 'Low fees and low carbon minting'
-        },
-        {
-          property: 'twitter:description',
-          content: 'Create carbonless NFTs with low on-chain fees'
-        },
-        {
-          property: 'twitter:image',
-          content: 'https://nft.kodadot.xyz/kodadot_mint.jpg'
-        }
-      ]
+      title,
+      meta: [...this.$seoMeta(metaData)],
     }
   },
-  components
 })
 export default class PermaMint extends mixins(
   SubscribeMixin,
@@ -234,21 +168,21 @@ export default class PermaMint extends mixins(
 ) {
   private rmrkMint: SimpleNFT = {
     ...emptyObject<SimpleNFT>(),
-    max: 1
-  };
-  private meta: NFTMetadata = emptyObject<NFTMetadata>();
+    max: 1,
+  }
+  private meta: NFTMetadata = emptyObject<NFTMetadata>()
   // private accountId: string = '';
-  private uploadMode = true;
-  private file: Blob | null = null;
-  private secondFile: Blob | null = null;
-  private password = '';
-  private hasToS = false;
-  private hasSupport = false;
-  private nsfw = false;
-  private price = 0;
-  private estimated = '';
-  private hasCarbonOffset = false;
-  protected arweaveUpload = false;
+  private uploadMode = true
+  private file: Blob | null = null
+  private secondFile: Blob | null = null
+  private password = ''
+  private hasToS = false
+  private hasSupport = false
+  private nsfw = false
+  private price = 0
+  private estimated = ''
+  private hasCarbonOffset = false
+  protected arweaveUpload = false
 
   protected updateMeta(value: number) {
     console.log(typeof value, value)
@@ -302,17 +236,17 @@ export default class PermaMint extends mixins(
       const remarks: string[] = Array.isArray(result)
         ? result
         : [
-          NFTUtils.toString(result.collection, version),
-          ...result.nfts.map(nft => NFTUtils.toString(nft, version))
-        ]
+            NFTUtils.toString(result.collection, version),
+            ...result.nfts.map((nft) => NFTUtils.toString(nft, version)),
+          ]
 
       const args = !this.hasSupport
         ? remarks.map(this.toRemark)
         : [
-          ...remarks.map(this.toRemark),
-          ...(await this.canSupport()),
-          ...(await this.canOffset())
-        ]
+            ...remarks.map(this.toRemark),
+            ...(await this.canSupport()),
+            ...(await this.canOffset()),
+          ]
 
       const tx = await exec(
         this.accountId,
@@ -320,7 +254,7 @@ export default class PermaMint extends mixins(
         cb,
         [args],
         txCb(
-          async blockHash => {
+          async (blockHash) => {
             execResultValue(tx)
             const header = await api.rpc.chain.getHeader(blockHash)
             const blockNumber = header.number.toString()
@@ -338,12 +272,12 @@ export default class PermaMint extends mixins(
 
             this.isLoading = false
           },
-          dispatchError => {
+          (dispatchError) => {
             execResultValue(tx)
             this.onTxError(dispatchError)
             this.isLoading = false
           },
-          res => this.resolveStatus(res.status)
+          (res) => this.resolveStatus(res.status)
         )
       )
     } catch (e: any) {
@@ -389,14 +323,14 @@ export default class PermaMint extends mixins(
       showNotification(
         `[APP] Listing NFT to sale for ${formatBalance(price, {
           decimals: this.decimals,
-          withUnit: this.unit
+          withUnit: this.unit,
         })}`
       )
 
       const onlyNfts = remarks
         .filter(NFTUtils.isNFT)
-        .map(nft => ({ ...nft, id: getNftId(nft, originalBlockNumber) }))
-        .map(nft =>
+        .map((nft) => ({ ...nft, id: getNftId(nft, originalBlockNumber) }))
+        .map((nft) =>
           NFTUtils.createInteraction('LIST', version, nft.id, String(price))
         )
 
@@ -417,7 +351,7 @@ export default class PermaMint extends mixins(
         cb,
         [args],
         txCb(
-          async blockHash => {
+          async (blockHash) => {
             execResultValue(tx)
             const header = await api.rpc.chain.getHeader(blockHash)
             const blockNumber = header.number.toString()
@@ -427,7 +361,7 @@ export default class PermaMint extends mixins(
                 this.rmrkMint.max
               } NFTs with tag ${formatBalance(price, {
                 decimals: this.decimals,
-                withUnit: this.unit
+                withUnit: this.unit,
               })} in block ${blockNumber}`,
               notificationTypes.success
             )
@@ -439,7 +373,7 @@ export default class PermaMint extends mixins(
               this.navigateToDetail(firstNft, originalBlockNumber)
             }
           },
-          dispatchError => {
+          (dispatchError) => {
             execResultValue(tx)
             this.onTxError(dispatchError)
             this.isLoading = false
@@ -483,9 +417,11 @@ export default class PermaMint extends mixins(
       ...this.meta,
       name,
       attributes: [
-        ...(this.rmrkMint?.tags || []).map(t => t.trait_type ? t : ({ ...t, trait_type: '' })),
+        ...(this.rmrkMint?.tags || []).map((t) =>
+          t.trait_type ? t : { ...t, trait_type: '' }
+        ),
         ...this.nsfwAttribute(),
-        ...this.offsetAttribute()
+        ...this.offsetAttribute(),
       ],
       external_url: 'https://nft.kodadot.xyz',
       type: this.file.type,
@@ -525,17 +461,10 @@ export default class PermaMint extends mixins(
     showNotification('You will go to the detail in 2 seconds')
     const go = () =>
       this.$router.push({
-        path: `/rmrk/gallery/${getNftId(nft, blockNumber)}`,
-        query: { message: 'congrats' }
+        path: `/rmrk/detail/${getNftId(nft, blockNumber)}`,
+        query: { message: 'congrats' },
       })
     setTimeout(go, 2000)
   }
 }
 </script>
-
-<style>
-/* ??? global */
-.message.is-primary .message-body {
-  color: #d32e79 !important;
-}
-</style>

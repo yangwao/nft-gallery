@@ -1,16 +1,16 @@
-
 <template>
   <component
     :is="resolveComponent"
     v-if="src"
     :src="src"
-  />
+    :poster="poster"
+    :description="description"
+    :availableAnimations="availableAnimations" />
 </template>
 
-<script lang="ts" >
+<script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import { resolveMedia } from '../utils'
-
 
 const VideoMedia = () => import('./VideoMedia.vue')
 const ImageMedia = () => import('./ImageMedia.vue')
@@ -30,12 +30,15 @@ const SUFFIX = 'Media'
     ModelMedia,
     IFrameMedia,
     ObjectMedia,
-    Media
-  }
+    Media,
+  },
 })
 export default class MediaResolver extends Vue {
-  @Prop() public src!: string;
-  @Prop() public mimeType!: string;
+  @Prop(String) public src!: string
+  @Prop(String) public mimeType!: string
+  @Prop(String) public poster?: string
+  @Prop(String) public description?: string
+  @Prop(Array) public availableAnimations?: string[]
 
   get resolveComponent() {
     return resolveMedia(this.mimeType) + SUFFIX
@@ -65,6 +68,5 @@ export default class MediaResolver extends Vue {
   //   }
 
   // }
-
 }
 </script>

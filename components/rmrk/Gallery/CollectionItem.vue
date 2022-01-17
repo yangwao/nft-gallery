@@ -7,30 +7,26 @@
             :src="image"
             :alt="name"
             rounded
-            customClass="collection__image"
-          />
+            customClass="collection__image" />
         </div>
         <h1 class="title is-2">
-          <template v-if="!isLoading">
+          <template>
             {{ name }}
           </template>
-          <b-skeleton :active="isLoading" size="is-medium"></b-skeleton>
         </h1>
       </div>
     </div>
 
     <div class="columns is-align-items-center">
       <div class="column">
-        <div v-if="!isLoading">
+        <div>
           <div class="label">
             {{ $t('creator') }}
           </div>
           <div v-if="issuer" class="subtitle is-size-6">
-            <ProfileLink :address="issuer" inline showTwitter />
+            <ProfileLink :address="issuer" inline showTwitter showDiscord />
           </div>
         </div>
-        <b-skeleton :active="isLoading" width="40%" size="is-small"></b-skeleton>
-        <b-skeleton :active="isLoading" width="60%" size="is-small"></b-skeleton>
       </div>
 
       <div class="column is-6-tablet is-7-desktop is-8-widescreen">
@@ -38,11 +34,12 @@
       </div>
 
       <div class="column has-text-right">
-        <Sharing v-if="sharingVisible"
+        <Sharing
+          v-if="sharingVisible"
           class="mb-2"
           :label="name"
           :iframe="iframeSettings">
-            <DonationButton :address="issuer" />
+          <DonationButton :address="issuer" />
         </Sharing>
       </div>
     </div>
@@ -52,22 +49,36 @@
         <CollapseWrapper
           visible="collapse.collection.description.show"
           hidden="collapse.collection.description.hide"
-        >
+          :open-on-default="!compactCollection"
+          isSelectable>
           <VueMarkdown :source="description" />
         </CollapseWrapper>
       </div>
     </div>
 
-    <b-tabs position="is-centered" v-model="activeTab">
+    <b-tabs
+      position="is-centered"
+      v-model="activeTab"
+      class="tabs-container-mobile">
       <b-tab-item label="Collection" value="collection">
         <Search v-bind.sync="searchQuery">
           <Layout class="mr-5" />
           <b-field>
-            <Pagination hasMagicBtn simple replace preserveScroll :total="total" v-model="currentValue" :per-page="first" />
+            <Pagination
+              hasMagicBtn
+              simple
+              replace
+              preserveScroll
+              :total="total"
+              v-model="currentValue"
+              :per-page="first" />
           </b-field>
         </Search>
 
-        <GalleryCardList :items="collection.nfts" horizontalLayout />
+        <GalleryCardList
+          :items="collection.nfts"
+          :listed="!!(searchQuery && searchQuery.listed)"
+          horizontalLayout />
 
         <Pagination
           class="py-5"
@@ -75,8 +86,7 @@
           preserveScroll
           :total="total"
           v-model="currentValue"
-          :per-page="first"
-        />
+          :per-page="first" />
       </b-tab-item>
       <b-tab-item label="Activity" value="activity">
         <CollectionPriceChart :priceData="priceData" />
@@ -85,13 +95,21 @@
   </section>
 </template>
 
-<script lang="ts" >
+<script lang="ts">
 import { emptyObject } from '@/utils/empty'
 import { Component, mixins, Watch } from 'nuxt-property-decorator'
 import { CollectionWithMeta, Interaction } from '../service/scheme'
 import {
-  sanitizeIpfsUrl, fetchCollectionMetadata, sortByTimeStamp, onlyEvents, onlyPriceEvents,
-  eventTimestamp, soldNFTPrice, collectionFloorPriceList, PriceDataType, onlyBuyEvents
+  sanitizeIpfsUrl,
+  fetchCollectionMetadata,
+  sortByTimeStamp,
+  onlyEvents,
+  onlyPriceEvents,
+  eventTimestamp,
+  soldNFTPrice,
+  collectionFloorPriceList,
+  PriceDataType,
+  onlyBuyEvents,
 } from '../utils'
 import isShareMode from '@/utils/isShareMode'
 import shouldUpdate from '@/utils/shouldUpdate'
@@ -102,59 +120,46 @@ import { NFT } from '@/components/rmrk/service/scheme'
 import { exist } from '@/components/rmrk/Gallery/Search/exist'
 import { SearchQuery } from './Search/types'
 import ChainMixin from '@/utils/mixins/chainMixin'
+import PrefixMixin from '~/utils/mixins/prefixMixin'
 
 const components = {
-  GalleryCardList: () => import('@/components/rmrk/Gallery/GalleryCardList.vue'),
-  CollectionActivity: () => import('@/components/rmrk/Gallery/CollectionActivity.vue'),
+  GalleryCardList: () =>
+    import('@/components/rmrk/Gallery/GalleryCardList.vue'),
+  CollectionActivity: () =>
+    import('@/components/rmrk/Gallery/CollectionActivity.vue'),
   Sharing: () => import('@/components/rmrk/Gallery/Item/Sharing.vue'),
   ProfileLink: () => import('@/components/rmrk/Profile/ProfileLink.vue'),
-  VueMarkdown: () => import('vue-markdown-render'),
   Search: () => import('./Search/SearchBarCollection.vue'),
   Pagination: () => import('@/components/rmrk/Gallery/Pagination.vue'),
   DonationButton: () => import('@/components/transfer/DonationButton.vue'),
   Layout: () => import('@/components/rmrk/Gallery/Layout.vue'),
-  CollectionPriceChart: () => import('@/components/rmrk/Gallery/CollectionPriceChart.vue'),
+  CollectionPriceChart: () =>
+    import('@/components/rmrk/Gallery/CollectionPriceChart.vue'),
   BasicImage: () => import('@/components/shared/view/BasicImage.vue'),
-  CollapseWrapper: () => import('@/components/shared/collapse/CollapseWrapper.vue'),
+  CollapseWrapper: () =>
+    import('@/components/shared/collapse/CollapseWrapper.vue'),
+  VueMarkdown: () => import('vue-markdown-render'),
 }
 @Component<CollectionItem>({
-  metaInfo() {
-    const image = `https://og-image-green-seven.vercel.app/${encodeURIComponent(this.collection.name as string)}.png?price=Items: ${this.collection?.nfts?.length}&image=${(this.meta.image as string)}`
-    return {
-      title: 'KodaDot cares about environmental impact',
-      titleTemplate: '%s | Low Carbon NFTs',
-      meta: [
-        { name: 'description', content: 'Creating Carbonless NFTs on Kusama' },
-        { property: 'og:title', content: this.collection.name || 'KodaDot cares about environmental impact'},
-        { property: 'og:url', content: 'https://nft.kodadot.xyz/' + this.$route.path },
-        { property: 'og:image', content: image},
-        { property: 'og:description', content: this.meta.description || 'Creating Carbonless NFTs on Kusama'},
-        { property: 'twitter:card', content: 'summary_large_image' },
-        { property: 'twitter:title', content: this.collection.name || 'KodaDOT cares about environmental impact'},
-        { property: 'twitter:description', content: this.meta.description || 'Creating Carbonless NFTs on Kusama'},
-        { property: 'twitter:image', content: image},
-      ]
-    }
-  },
-  components })
-export default class CollectionItem extends mixins(
-  ChainMixin
-) {
-  private id = '';
-  private collection: CollectionWithMeta = emptyObject<CollectionWithMeta>();
-  public meta: CollectionMetadata = emptyObject<CollectionMetadata>();
+  components,
+})
+export default class CollectionItem extends mixins(ChainMixin, PrefixMixin) {
+  private id = ''
+  private collection: CollectionWithMeta = emptyObject<CollectionWithMeta>()
+  public meta: CollectionMetadata = emptyObject<CollectionMetadata>()
   private searchQuery: SearchQuery = {
     search: '',
     type: '',
     sortBy: 'BLOCK_NUMBER_DESC',
     listed: false,
-  };
-  public activeTab = 'collection';
-  private currentValue = 1;
-  private first = 15;
-  protected total = 0;
-  protected stats: NFT[] = [];
-  protected priceData: any = [];
+  }
+  public activeTab = 'collection'
+  private currentValue = 1
+  private first = 15
+  protected total = 0
+  protected stats: NFT[] = []
+  protected priceData: any = []
+  private statsLoaded = false
 
   get isLoading(): boolean {
     return this.$apollo.queries.collection.loading
@@ -164,7 +169,7 @@ export default class CollectionItem extends mixins(
     return this.currentValue * this.first - this.first
   }
 
-  get image(): string|undefined {
+  get image(): string | undefined {
     return this.meta.image
   }
 
@@ -188,18 +193,22 @@ export default class CollectionItem extends mixins(
     return !isShareMode
   }
 
+  get compactCollection(): boolean {
+    return this.$store.getters['preferences/getCompactCollection']
+  }
+
   private buildSearchParam(): Record<string, unknown>[] {
     const params: any[] = []
 
     if (this.searchQuery.search) {
       params.push({
-        name: { likeInsensitive: `%${this.searchQuery.search}%` }
+        name: { likeInsensitive: `%${this.searchQuery.search}%` },
       })
     }
 
     if (this.searchQuery.listed) {
       params.push({
-        price: { greaterThan: '0' }
+        price: { greaterThan: '0' },
       })
     }
 
@@ -209,9 +218,9 @@ export default class CollectionItem extends mixins(
   public created(): void {
     this.checkId()
     this.checkActiveTab()
-    this.loadStats()
     this.$apollo.addSmartQuery('collection', {
       query: collectionById,
+      client: this.urlPrefix,
       loadingKey: 'isLoading',
       variables: () => {
         return {
@@ -219,30 +228,39 @@ export default class CollectionItem extends mixins(
           orderBy: this.searchQuery.sortBy,
           search: this.buildSearchParam(),
           first: this.first,
-          offset: this.offset
+          offset: this.offset,
         }
       },
-      update: ({ collectionEntity }) => ({
-        ...collectionEntity,
-        nfts: collectionEntity.nfts.nodes
-      }),
+      update: ({ collectionEntity }) => {
+        if (!collectionEntity) {
+          this.$router.push({ name: 'errorcollection' })
+          return
+        }
+        return {
+          ...collectionEntity,
+          nfts: collectionEntity.nfts.nodes,
+        }
+      },
       result: this.handleResult,
     })
-
   }
 
   public loadStats(): void {
     const nftStatsP = this.$apollo.query({
       query: nftListByCollection,
+      client: this.urlPrefix,
       variables: {
         id: this.id,
-      }
+      },
     })
 
-    nftStatsP.then(({ data }) => data?.nFTEntities?.nodes || []).then(nfts => {
-      this.stats = nfts
-      this.loadPriceData()
-    })
+    nftStatsP
+      .then(({ data }) => data?.nFTEntities?.nodes || [])
+      .then((nfts) => {
+        this.stats = nfts
+        this.statsLoaded = true
+        this.loadPriceData()
+      })
   }
 
   public loadPriceData(): void {
@@ -251,17 +269,24 @@ export default class CollectionItem extends mixins(
     const events: Interaction[][] = this.stats?.map(onlyEvents) || []
     const priceEvents: Interaction[][] = events.map(this.priceEvents) || []
 
-    const overTime: string[] = priceEvents.flat().sort(sortByTimeStamp).map(eventTimestamp)
+    const overTime: string[] = priceEvents
+      .flat()
+      .sort(sortByTimeStamp)
+      .map(eventTimestamp)
 
-    const floorPriceData: PriceDataType[] = overTime.map(collectionFloorPriceList(priceEvents, this.decimals))
+    const floorPriceData: PriceDataType[] = overTime.map(
+      collectionFloorPriceList(priceEvents, this.decimals)
+    )
 
     const buyEvents = events.map(onlyBuyEvents)?.flat().sort(sortByTimeStamp)
-    const soldPriceData: PriceDataType[] = buyEvents?.map(soldNFTPrice(this.decimals))
+    const soldPriceData: PriceDataType[] = buyEvents?.map(
+      soldNFTPrice(this.decimals)
+    )
 
     this.priceData = [floorPriceData, soldPriceData]
   }
 
-  public async handleResult({data}: any): Promise<void> {
+  public async handleResult({ data }: any): Promise<void> {
     this.total = data.collectionEntity.nfts.totalCount
     await this.fetchMetadata()
   }
@@ -273,6 +298,12 @@ export default class CollectionItem extends mixins(
         ...meta,
         image: sanitizeIpfsUrl(meta.image || ''),
       }
+      this.$store.dispatch('history/setCurrentlyViewedCollection', {
+        name: this.name,
+        image: this.image,
+        description: this.description,
+        numberOfItems: this.collection?.nfts?.length || 0,
+      })
     }
   }
 
@@ -290,11 +321,18 @@ export default class CollectionItem extends mixins(
 
   @Watch('activeTab')
   protected onTabChange(val: string, oldVal: string): void {
-    if (shouldUpdate(val, oldVal)) {
+    let queryTab = this.$route.query.tab
+
+    if (shouldUpdate(val, oldVal) && queryTab !== val) {
       this.$router.replace({
         path: String(this.$route.path),
         query: { tab: val },
       })
+    }
+
+    // Load chart data once when clicked on activity tab for the first time.
+    if (val === 'activity' && !this.statsLoaded) {
+      this.loadStats()
     }
   }
 
@@ -308,7 +346,7 @@ export default class CollectionItem extends mixins(
 }
 </script>
 
-<style>
+<style lang="scss">
 .collection__image img {
   color: transparent;
 }
