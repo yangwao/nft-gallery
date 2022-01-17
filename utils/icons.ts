@@ -70,6 +70,7 @@ import {
   faHistory,
   faEllipsisH,
   faLightbulb,
+  faVrCardboard,
 } from '@fortawesome/free-solid-svg-icons'
 
 // throws error, idk why
@@ -166,6 +167,7 @@ library.add(
   faHistory,
   faEllipsisH,
   faLightbulb,
+  faVrCardboard,
 
   // Social
   faTwitter,
